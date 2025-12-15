@@ -23,8 +23,14 @@ class RoleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        // Stub; implement validation/business logic later
-        return redirect()->route('admin.roles.index');
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:50', 'unique:roles,name'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $role = Role::create($validated);
+
+        return redirect()->route('admin.roles.show', $role)->with('success', 'Role created');
     }
 
     public function show(Role $role): View
@@ -39,13 +45,20 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role): RedirectResponse
     {
-        // Stub; implement validation/business logic later
-        return redirect()->route('admin.roles.show', $role);
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:50', 'unique:roles,name,'.$role->id],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $role->update($validated);
+
+        return redirect()->route('admin.roles.show', $role)->with('success', 'Role updated');
     }
 
     public function destroy(Role $role): RedirectResponse
     {
-        // Stub; implement deletion logic later
-        return redirect()->route('admin.roles.index');
+        $role->delete();
+
+        return redirect()->route('admin.roles.index')->with('success', 'Role deleted');
     }
 }

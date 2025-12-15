@@ -25,8 +25,20 @@ class LoanApprovalController extends Controller
 
         $loan->update([
             'status' => 'rejected',
+            'rejected_at' => now(),
         ]);
 
         return back()->with('success', 'Loan rejected');
+    }
+
+    public function hold(LoanApplication $loan): RedirectResponse
+    {
+        $this->authorize('hold', $loan);
+
+        $loan->update([
+            'status' => 'on_hold',
+        ]);
+
+        return back()->with('success', 'Loan placed on hold');
     }
 }

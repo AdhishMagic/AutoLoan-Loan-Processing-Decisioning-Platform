@@ -38,4 +38,9 @@ class LoanApplicationPolicy
     {
         return $this->approve($user, $loan);
     }
+
+    public function hold(User $user, LoanApplication $loan): bool
+    {
+        return $this->approve($user, $loan);
+    }
 }
