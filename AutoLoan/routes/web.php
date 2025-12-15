@@ -24,9 +24,11 @@ Route::middleware('auth')->group(function () {
 
     // USER
     Route::middleware('role:user')->group(function () {
-        // Optional: expose a real applications page
-        Route::view('/user/applications', 'user.applications')->name('user.applications');
-        // Route::resource('loans', LoanApplicationController::class); // enable when controller methods are ready
+        Route::resource('loans', LoanApplicationController::class);
+        Route::get('/user/applications', function () {
+            // Redirect to loans index for consistency
+            return redirect()->route('loans.index');
+        })->name('user.applications');
     });
 
     // LOAN OFFICER (manager role)
