@@ -108,4 +108,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class);
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role?->name === 'admin';
+    }
+
+    public function isLoanOfficer(): bool
+    {
+        return $this->role?->name === 'manager';
+    }
+
+    public function isCustomerSupport(): bool
+    {
+        return $this->role?->name === 'customer_service';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role?->name === 'user';
+    }
 }
