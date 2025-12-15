@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class CreditCheck extends Model
+{
+    /** @var array<int, string> */
+    protected $fillable = [
+        'loan_application_id',
+        'credit_score',
+        'risk_level',
+        'source',
+    ];
+
+    /**
+     * @return BelongsTo<LoanApplication, CreditCheck>
+     */
+    public function loanApplication(): BelongsTo
+    {
+        return $this->belongsTo(LoanApplication::class);
+    }
+}
