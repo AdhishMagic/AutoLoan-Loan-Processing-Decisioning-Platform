@@ -10,6 +10,11 @@ class LoanStatusHistory extends Model
 {
     use HasUuids;
 
+    /**
+     * Explicit table to match migration (singular name).
+     */
+    protected $table = 'loan_status_history';
+
     protected $fillable = [
         'loan_application_id',
         'previous_status',

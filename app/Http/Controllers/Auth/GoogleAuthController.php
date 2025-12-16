@@ -45,6 +45,15 @@ class GoogleAuthController extends Controller
                 return $user;
             }
 
+            // Resolve role id for default OAuth users
+            $roleId = (int) (Role::query()->where('name', 'user')->value('id')
+                ?: DB::table('roles')->insertGetId([
+                    'name' => 'user',
+                    'description' => 'Loan applicant',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]));
+
             // Find existing user by email, or create a new one
             $user = User::firstOrCreate(
                 ['email' => $googleUser->getEmail()],
@@ -53,15 +62,7 @@ class GoogleAuthController extends Controller
                     'password' => null,
                     'email_verified_at' => now(),
                     'status' => 'active',
-                    'role_id' => function () {
-                        return (int) (Role::query()->where('name', 'user')->value('id')
-                            ?: DB::table('roles')->insertGetId([
-                                'name' => 'user',
-                                'description' => 'Loan applicant',
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]));
-                    },
+                    'role_id' => $roleId,
                 ]
             );
 

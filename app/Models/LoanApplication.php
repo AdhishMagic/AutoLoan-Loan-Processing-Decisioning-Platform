@@ -16,6 +16,9 @@ class LoanApplication extends Model
         'application_number',
         'application_date',
         'user_id',
+        // Minimal fields used by initial create form
+        'loan_type',
+        'tenure_months',
         'loan_product_type',
         'loan_product_code',
         'loan_scheme',
@@ -88,6 +91,7 @@ class LoanApplication extends Model
         'requested_amount' => 'decimal:2',
         'sanctioned_amount' => 'decimal:2',
         'disbursed_amount' => 'decimal:2',
+        'tenure_months' => 'integer',
         'requested_tenure_months' => 'integer',
         'sanctioned_tenure_months' => 'integer',
         'requested_interest_rate' => 'decimal:2',
