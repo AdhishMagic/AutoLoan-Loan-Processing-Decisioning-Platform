@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('loan_decisions', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('loan_application_id');
+            $table->uuid('id')->primary();
+            $table->uuid('loan_application_id');
             $table->string('decision', 30);
             $table->text('remarks')->nullable();
             $table->unsignedBigInteger('decided_by')->nullable();

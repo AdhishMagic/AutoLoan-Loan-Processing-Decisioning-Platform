@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kyc_checks', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('loan_application_id');
+            $table->uuid('id')->primary();
+            $table->uuid('loan_application_id');
             $table->string('kyc_type', 50);
             $table->string('result', 20)->default('pending');
             $table->unsignedBigInteger('verified_by')->nullable();

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('loan_applications', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->unsignedBigInteger('user_id');
             $table->string('loan_type', 50);
             $table->decimal('requested_amount', 12, 2);

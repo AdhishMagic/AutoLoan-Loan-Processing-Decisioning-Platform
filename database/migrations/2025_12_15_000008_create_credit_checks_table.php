@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('credit_checks', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('loan_application_id');
+            $table->uuid('id')->primary();
+            $table->uuid('loan_application_id');
             $table->integer('credit_score')->nullable();
             $table->string('risk_level', 20)->nullable();
             $table->string('source', 100)->nullable();

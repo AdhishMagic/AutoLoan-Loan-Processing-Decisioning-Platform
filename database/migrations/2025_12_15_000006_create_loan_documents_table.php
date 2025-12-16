@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('loan_documents', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('loan_application_id');
+            $table->uuid('id')->primary();
+            $table->uuid('loan_application_id');
             $table->string('document_type', 50);
             $table->string('file_path', 255);
             $table->unsignedBigInteger('verified_by')->nullable();
