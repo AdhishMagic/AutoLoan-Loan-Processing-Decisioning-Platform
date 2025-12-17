@@ -56,6 +56,14 @@
                         @endforeach
                     </ol>
                 </nav>
+                @if(($loan->status ?? 'DRAFT') === 'DRAFT')
+                <div class="mt-3 flex justify-end">
+                    <form method="POST" action="{{ route('loans.save-draft', ['loan' => $loan->id]) }}">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center rounded-md bg-amber-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-500">Save Draft</button>
+                    </form>
+                </div>
+                @endif
             </div>
         </div>
     </div>

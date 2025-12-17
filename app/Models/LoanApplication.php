@@ -37,6 +37,7 @@ class LoanApplication extends Model
         'loan_purpose',
         'purpose_description',
         'status',
+        'is_saved',
         'current_stage',
         'stage_order',
         'assigned_officer_id',
@@ -126,6 +127,7 @@ class LoanApplication extends Model
         'requires_manager_approval' => 'boolean',
         'is_fast_track' => 'boolean',
         'is_top_up_loan' => 'boolean',
+        'is_saved' => 'boolean',
     ];
 
     // Relationships to Users

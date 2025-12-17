@@ -1,5 +1,5 @@
 <!-- Top Navbar using Flowbite -->
-<nav class="bg-white/95 border-b backdrop-blur supports-[backdrop-filter]:bg-white/70">
+<nav class="sticky top-0 z-[60] bg-white/95 border-b backdrop-blur supports-[backdrop-filter]:bg-white/70 overflow-visible">
   <div class="mx-auto w-full max-w-7xl px-3 sm:px-4">
     <div class="flex h-14 sm:h-16 items-center justify-between">
       <!-- Left: App Name + Mobile menu button -->
@@ -22,7 +22,7 @@
       </div>
 
       <!-- Right: Notifications + Profile -->
-      <div class="flex items-center gap-1 sm:gap-2">
+      <div class="relative z-[60] flex items-center gap-1 sm:gap-2">
         @auth
         <button type="button" class="relative inline-flex items-center rounded-lg p-2 text-gray-500 hover:bg-gray-100">
           <span class="sr-only">View notifications</span>
@@ -30,13 +30,13 @@
           <span class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-medium text-white">3</span>
         </button>
 
-        <button id="profileMenuButton" data-dropdown-toggle="profileMenu" class="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100">
+        <button id="profileMenuButton" data-dropdown-toggle="profileMenu" data-dropdown-placement="bottom-end" class="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100">
           <img src="https://api.dicebear.com/9.x/initials/svg?seed={{ urlencode(Auth::user()->name ?? 'U') }}" alt="avatar" class="h-8 w-8 rounded-full" />
           <span class="hidden md:inline text-sm font-medium">{{ Auth::user()->name }}</span>
           <svg class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
         </button>
         <!-- Profile dropdown -->
-        <div id="profileMenu" class="z-50 hidden w-56 divide-y divide-gray-100 rounded-lg bg-white shadow">
+        <div id="profileMenu" class="fixed right-3 top-14 sm:top-16 z-[80] hidden w-56 divide-y divide-gray-100 rounded-lg bg-white shadow-xl">
           <div class="px-4 py-3 text-sm">
             <div class="font-medium">{{ Auth::user()->name }}</div>
             <div class="truncate text-gray-500">{{ Auth::user()->email }}</div>

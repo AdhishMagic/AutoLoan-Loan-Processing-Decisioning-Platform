@@ -9,7 +9,11 @@
                     $isUser = $user?->isUser();
                     $appsQuery = \App\Models\LoanApplication::query();
                     if ($isUser) {
-                        $appsQuery->where('user_id', $user->id);
+                        $appsQuery->where('user_id', $user->id)
+                                  ->where(function($q){
+                                      $q->where('status', '!=', 'DRAFT')
+                                        ->orWhere('is_saved', true);
+                                  });
                     }
                     $totalApps = (clone $appsQuery)->count();
                     $approved = (clone $appsQuery)->where('status', 'approved')->count();

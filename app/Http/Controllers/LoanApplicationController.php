@@ -326,6 +326,21 @@ class LoanApplicationController extends Controller
         return redirect()->route('loans.index')->with('success', 'Application deleted');
     }
 
+    public function saveDraft(LoanApplication $loan): RedirectResponse
+    {
+        Gate::authorize('update', $loan);
+
+        // Only allow saving when in DRAFT
+        if (strtoupper((string) $loan->status) !== 'DRAFT') {
+            return back()->with('success', 'Only draft applications can be saved as draft.');
+        }
+
+        $loan->update([
+            'is_saved' => true,
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Draft saved to dashboard.');
+    }
     public function bulkDestroy(Request $request, LoanApplicationService $service): RedirectResponse
     {
         $validated = $request->validate([
