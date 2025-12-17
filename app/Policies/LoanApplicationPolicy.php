@@ -47,4 +47,16 @@ class LoanApplicationPolicy
     {
         return $this->approve($user, $loan);
     }
+
+    public function delete(User $user, LoanApplication $loan): bool
+    {
+        // Admins can delete any application
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Owners can delete only while in DRAFT
+        $status = strtoupper((string) $loan->status);
+        return $loan->user_id === $user->id && $status === 'DRAFT';
+    }
 }

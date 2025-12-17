@@ -10,7 +10,7 @@ class OfficerController extends Controller
     public function index(): View
     {
         $loans = LoanApplication::query()
-            ->with('applicant')
+            ->with('primaryApplicant')
             ->where('status', 'under_review')
             ->orderByDesc('submitted_at')
             ->paginate(15);

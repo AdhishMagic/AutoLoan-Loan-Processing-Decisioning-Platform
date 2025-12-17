@@ -6,6 +6,8 @@ use App\Http\Requests\StoreLoanApplicationRequest;
 use App\Http\Requests\UpdateLoanApplicationRequest;
 use App\Models\LoanApplication;
 use App\Services\LoanApplicationService;
+use App\Jobs\ProcessLoanApplication;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -74,22 +76,35 @@ class LoanApplicationController extends Controller
                     break;
 
                 case 2: // Applicants (Primary)
-                    // Ensure Primary Applicant exists
-                    $applicant = $loan->primaryApplicant()->firstOrNew([
-                        'applicant_role' => 'PRIMARY'
-                    ]);
-                    
-                    // Update Applicant Details
-                    $applicant->fill($request->only([
-                        'first_name', 'last_name', 'date_of_birth', 'gender', 'marital_status',
-                        'pan_number', 'aadhaar_number', 'mobile', 'email'
-                    ]));
-                    $applicant->save();
+                    try {
+                        // Create or update by role within this loan
+                        $loan->applicants()->updateOrCreate(
+                            ['applicant_role' => 'PRIMARY'],
+                            $request->only([
+                                'first_name', 'last_name', 'date_of_birth', 'gender', 'marital_status',
+                                'pan_number', 'aadhaar_number', 'mobile', 'email'
+                            ]) + ['applicant_role' => 'PRIMARY']
+                        );
+                    } catch (QueryException $e) {
+                        // Handle unique constraint violations gracefully (Postgres 23505)
+                        if ((int) ($e->getCode()) === 23505 || str_contains(strtolower($e->getMessage()), 'unique')) {
+                            $message = 'Duplicate value detected.';
+                            $lower = strtolower($e->getMessage());
+                            if (str_contains($lower, 'aadhaar')) {
+                                $message = 'This Aadhaar number is already used in another application.';
+                            } elseif (str_contains($lower, 'pan')) {
+                                $message = 'This PAN number is already used in another application.';
+                            }
+                            return back()->withErrors(['aadhaar_number' => $message])->withInput();
+                        }
+                        throw $e;
+                    }
                     
                     // Update Current Address
                     // Assuming simplified address handling for now
                     if ($request->filled('current_address_line_1')) {
-                        $applicant->addresses()->updateOrCreate(
+                        $applicant = $loan->primaryApplicant()->first();
+                        $applicant?->addresses()->updateOrCreate(
                             ['address_type' => 'CURRENT'],
                             [
                                 'address_line_1' => $request->current_address_line_1,
@@ -151,7 +166,7 @@ class LoanApplicationController extends Controller
                     
                     if ($request->filled('property_address')) {
                         $property->addresses()->updateOrCreate(
-                            ['address_type' => 'PROPERTY_LOCATION'],
+                            ['address_type' => 'PROPERTY'],
                             [
                                 'address_line_1' => $request->property_address,
                                 'city' => $request->property_city,
@@ -165,23 +180,73 @@ class LoanApplicationController extends Controller
                 case 6: // References
                      // Clear old and add new (Naive approach) or Update
                      if ($request->filled('ref_1_name')) {
-                         $loan->references()->updateOrCreate(['relation' => $request->ref_1_relation], [
-                             'name' => $request->ref_1_name,
-                             'mobile' => $request->ref_1_mobile,
-                             'address' => $request->ref_1_address
-                         ]);
+                         $relation = strtoupper(str_replace([' / ', '/', ' '], '_', (string) $request->ref_1_relation));
+                         $loan->references()->updateOrCreate(
+                             // Use mobile as a stable dedupe key per loan
+                             ['mobile' => $request->ref_1_mobile ?? ''],
+                             [
+                                 'reference_type' => 'PERSONAL',
+                                 'full_name' => $request->ref_1_name,
+                                 'relationship' => $relation ?: null,
+                                 'mobile' => $request->ref_1_mobile,
+                                 'address' => $request->ref_1_address,
+                             ]
+                         );
                      }
                      break;
 
                 case 7: // Declarations
                      // Save Declarations
+                     // PEP declaration (mapped to GENERAL_DECLARATION type)
                      $loan->declarations()->updateOrCreate(
-                         ['declaration_type' => 'PEOPLE_EXPOSED_PERSON'],
-                         ['is_accepted' => $request->has('pep')] // checkbox
+                         [
+                             'declaration_type' => 'GENERAL_DECLARATION',
+                             'declaration_title' => 'Politically Exposed Person (PEP)'
+                         ],
+                         [
+                             'declaration_text' => 'I declare that I am NOT a politically exposed person or related to one.',
+                             'is_accepted' => $request->has('pep'),
+                             'is_mandatory' => false,
+                         ]
                      );
+
+                     // Residency declaration (mapped to GENERAL_DECLARATION type)
                      $loan->declarations()->updateOrCreate(
-                         ['declaration_type' => 'CIBIL_CONSENT'],
-                         ['is_accepted' => $request->has('cibil'), 'is_mandatory' => true]
+                         [
+                             'declaration_type' => 'GENERAL_DECLARATION',
+                             'declaration_title' => 'Residency Declaration'
+                         ],
+                         [
+                             'declaration_text' => 'I declare that I am a Resident Indian.',
+                             'is_accepted' => $request->has('resident'),
+                             'is_mandatory' => false,
+                         ]
+                     );
+
+                     // Credit bureau consent
+                     $loan->declarations()->updateOrCreate(
+                         [
+                             'declaration_type' => 'CIBIL_CONSENT',
+                             'declaration_title' => 'Credit Check Consent'
+                         ],
+                         [
+                             'declaration_text' => 'I hereby authorize the bank to access my credit report from CIBIL/Experian for the purpose of this loan application.',
+                             'is_accepted' => $request->has('cibil'),
+                             'is_mandatory' => true,
+                         ]
+                     );
+
+                     // Terms & Privacy
+                     $loan->declarations()->updateOrCreate(
+                         [
+                             'declaration_type' => 'TERMS_CONDITIONS',
+                             'declaration_title' => 'Terms & Privacy Consent'
+                         ],
+                         [
+                             'declaration_text' => 'I agree to the Terms & Conditions and Privacy Policy of the bank.',
+                             'is_accepted' => $request->has('privacy'),
+                             'is_mandatory' => true,
+                         ]
                      );
                      break;
                 
@@ -190,6 +255,9 @@ class LoanApplicationController extends Controller
                          'status' => 'SUBMITTED',
                          'submitted_at' => now()
                      ]);
+                     // Dispatch background processing job
+                     // Ensure dispatch uses database queue connection to avoid Redis
+                     ProcessLoanApplication::dispatch($loan)->onConnection('database');
                      break;
             }
 
@@ -251,7 +319,7 @@ class LoanApplicationController extends Controller
 
     public function destroy(LoanApplication $loan, LoanApplicationService $service): RedirectResponse
     {
-        Gate::authorize('update', $loan);
+        Gate::authorize('delete', $loan);
 
         $service->delete($loan);
 
@@ -276,7 +344,7 @@ class LoanApplicationController extends Controller
         $skipped = [];
 
         foreach ($loans as $loan) {
-            if (Gate::allows('update', $loan)) {
+            if (Gate::allows('delete', $loan)) {
                 $service->delete($loan);
                 $deleted++;
             } else {

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\LoanApplication;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreLoanApplicationRequest extends FormRequest
 {
@@ -73,6 +74,18 @@ class StoreLoanApplicationRequest extends FormRequest
                 'ownership_type' => $ownershipType,
             ]);
         }
+
+        // Normalize inputs for Step 6 (References)
+        if ($step === 6) {
+            $normalize = function ($v) {
+                $v = strtoupper(trim((string) $v));
+                $v = str_replace([' / ', '/', ' '], '_', $v);
+                return $v;
+            };
+            $this->merge([
+                'ref_1_relation' => $normalize($this->input('ref_1_relation')),
+            ]);
+        }
     }
 
     public function rules(): array
@@ -92,12 +105,28 @@ class StoreLoanApplicationRequest extends FormRequest
 
         // Step 2: Applicants
         if ($step === 2) {
+            $loan = $this->route('loan');
+            $loanId = is_object($loan) ? ($loan->id ?? $loan->getKey()) : $loan;
+            $primaryApplicantId = null;
+            if (is_object($loan) && method_exists($loan, 'primaryApplicant')) {
+                $primaryApplicantId = optional($loan->primaryApplicant()->first())->id;
+            }
             $rules = [
                 'first_name' => ['required', 'string'],
                 'last_name' => ['required', 'string'],
                 'date_of_birth' => ['required', 'date'],
-                'pan_number' => ['required', 'string', 'size:10', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/'],
-                'aadhaar_number' => ['required', 'digits:12'],
+                'pan_number' => [
+                    'required', 'string', 'size:10', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/',
+                    Rule::unique('applicants', 'pan_number')
+                        ->where(fn($q) => $q->where('loan_application_id', $loanId))
+                        ->ignore($primaryApplicantId),
+                ],
+                'aadhaar_number' => [
+                    'required', 'digits:12',
+                    Rule::unique('applicants', 'aadhaar_number')
+                        ->where(fn($q) => $q->where('loan_application_id', $loanId))
+                        ->ignore($primaryApplicantId),
+                ],
                 'mobile' => ['required', 'digits:10'],
                 'email' => ['required', 'email'],
                 'gender' => ['required', 'in:MALE,FEMALE,OTHER'],
@@ -130,6 +159,16 @@ class StoreLoanApplicationRequest extends FormRequest
                  'property_state' => ['nullable', 'string', 'max:100'],
                  'property_pincode' => ['nullable', 'string', 'max:10'],
              ];
+        }
+
+        // Step 6: References
+        if ($step === 6) {
+            $rules = [
+                'ref_1_name' => ['nullable', 'string', 'max:200'],
+                'ref_1_relation' => ['nullable', 'in:FATHER,MOTHER,BROTHER,SISTER,SPOUSE,FRIEND,COLLEAGUE,MANAGER,NEIGHBOR,BUSINESS_ASSOCIATE,OTHER'],
+                'ref_1_mobile' => ['nullable', 'digits:10'],
+                'ref_1_address' => ['nullable', 'string', 'max:500'],
+            ];
         }
 
         return $rules;
