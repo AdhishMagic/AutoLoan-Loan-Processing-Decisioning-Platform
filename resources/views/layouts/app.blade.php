@@ -8,11 +8,9 @@
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900">
-    <div class="min-h-screen flex">
-        @include('layouts.partials.sidebar')
-        <div class="flex-1 flex flex-col">
-            @include('layouts.partials.navbar')
-            <main class="p-6">
+    <div class="min-h-screen flex flex-col">
+        @include('layouts.partials.navbar')
+        <main class="p-6">
                 @if (session('success'))
                     <div class="mb-4 rounded-md bg-green-50 p-4 text-green-800">{{ session('success') }}</div>
                 @endif
@@ -30,8 +28,7 @@
                 @else
                     @yield('content')
                 @endif
-            </main>
-        </div>
+        </main>
     </div>
 </body>
 </html>

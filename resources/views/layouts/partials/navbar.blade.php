@@ -2,23 +2,31 @@
 <nav class="sticky top-0 z-[60] bg-white/95 border-b backdrop-blur supports-[backdrop-filter]:bg-white/70 overflow-visible">
   <div class="mx-auto w-full max-w-7xl px-3 sm:px-4">
     <div class="flex h-14 sm:h-16 items-center justify-between">
-      <!-- Left: App Name + Mobile menu button -->
+      <!-- Left: App Name -->
       <div class="flex items-center">
-        <button data-drawer-target="sidebar" data-drawer-show="sidebar" aria-controls="sidebar" class="mr-2 inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none lg:hidden">
-          <span class="sr-only">Open sidebar</span>
-          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
         <a href="{{ route('dashboard') }}" class="text-base font-semibold text-gray-900">Auto Loan</a>
       </div>
 
-      <!-- Center: Search (optional) -->
-      <div class="hidden md:block w-1/3">
-        <div class="relative">
-          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd" /></svg>
-          </div>
-          <input type="text" class="block w-full rounded-lg border-gray-300 pl-10 text-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Search..." />
-        </div>
+      <!-- Center: Main navigation -->
+      <div class="hidden md:flex items-center gap-2">
+        @auth
+          <a href="{{ route('dashboard') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
+          @if (Auth::user()->isUser())
+            <a href="{{ route('loans.create') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Apply for Auto Loan</a>
+            <a href="{{ route('loans.index') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">My Loan Applications</a>
+          @endif
+        @endauth
+      </div>
+
+      <!-- Mobile: simple inline nav -->
+      <div class="md:hidden flex items-center">
+        @auth
+          <a href="{{ route('dashboard') }}" class="rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Home</a>
+          @if (Auth::user()->isUser())
+            <a href="{{ route('loans.index') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Loans</a>
+            <a href="{{ route('loans.create') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-white bg-indigo-600 hover:bg-indigo-700">Apply</a>
+          @endif
+        @endauth
       </div>
 
       <!-- Right: Notifications + Profile -->
