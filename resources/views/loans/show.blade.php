@@ -6,7 +6,12 @@
     <h1 class="text-xl font-semibold">Application Details</h1>
     <div class="flex items-center gap-2">
       @can('update', $loan)
-        <a href="{{ route('loans.edit', $loan) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Edit</a>
+        @php($nextStep = (($loan->stage_order ?? 0) + 1))
+        @if($loan->isDraft())
+          <a href="{{ route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Continue</a>
+        @else
+          <a href="{{ route('loans.edit', $loan) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Edit</a>
+        @endif
         <form method="POST" action="{{ route('loans.destroy', $loan) }}" onsubmit="return confirm('Delete this application?')">
           @csrf @method('DELETE')
           <button class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-white hover:bg-red-700">Delete</button>

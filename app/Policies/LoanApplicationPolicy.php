@@ -9,13 +9,13 @@ class LoanApplicationPolicy
 {
     public function view(User $user, LoanApplication $loan): bool
     {
-        return match ($user->role?->name) {
-            'admin' => true,
-            'manager' => true,
-            'customer_service' => true,
-            'user' => $loan->user_id === $user->id,
-            default => false,
-        };
+        // Always allow the owner to view their own application
+        if ($loan->user_id === $user->id) {
+            return true;
+        }
+
+        // Role-based access for staff
+        return in_array($user->role?->name, ['admin', 'manager', 'customer_service'], true);
     }
 
     public function create(User $user): bool
@@ -25,13 +25,17 @@ class LoanApplicationPolicy
 
     public function update(User $user, LoanApplication $loan): bool
     {
+        // Owner can update while in draft; admins can always update
         return $user->isAdmin()
-            || ($user->isUser() && $loan->user_id === $user->id && $loan->status === 'draft');
+            || ($loan->user_id === $user->id && ($loan->isDraft() || $loan->status === 'DRAFT'));
     }
 
     public function approve(User $user, LoanApplication $loan): bool
     {
-        return $user->isLoanOfficer() && $loan->status === 'under_review';
+        // Align with controller which sets 'approved' and related statuses.
+        // Allow approval when loan is submitted or under review (case-insensitive checks).
+        $status = strtoupper((string) $loan->status);
+        return $user->isLoanOfficer() && in_array($status, ['SUBMITTED', 'UNDER_REVIEW', 'PENDING_APPROVAL'], true);
     }
 
     public function reject(User $user, LoanApplication $loan): bool

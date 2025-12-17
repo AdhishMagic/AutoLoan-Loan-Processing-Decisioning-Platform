@@ -25,7 +25,12 @@ Route::middleware('auth')->group(function () {
 
     // USER
     Route::middleware('role:user')->group(function () {
+        // Place specific routes BEFORE the resource to avoid collisions with {loan}
+        Route::delete('loans/bulk-destroy', [LoanApplicationController::class, 'bulkDestroy'])->name('loans.bulk-destroy');
         Route::resource('loans', LoanApplicationController::class);
+        // Step-based Wizard Routes
+        Route::get('loans/{loan}/step/{step}', [LoanApplicationController::class, 'showStep'])->name('loans.step.show');
+        Route::post('loans/{loan}/step/{step}', [LoanApplicationController::class, 'storeStep'])->name('loans.step.store');
         Route::get('/user/applications', function () {
             // Redirect to loans index for consistency
             return redirect()->route('loans.index');
