@@ -24,6 +24,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->loadMigrationsFrom([
+            database_path('migrations/users'),
+            database_path('migrations/roles'),
+            database_path('migrations/loans'),
+            database_path('migrations/loan_documents'),
+            database_path('migrations/kyc_checks'),
+            database_path('migrations/credit_checks'),
+            database_path('migrations/underwriting_rules'),
+            database_path('migrations/audit_logs'),
+        ]);
+
         // Register model observers
         LoanApplication::observe(LoanApplicationObserver::class);
         LoanDocument::observe(LoanDocumentObserver::class);

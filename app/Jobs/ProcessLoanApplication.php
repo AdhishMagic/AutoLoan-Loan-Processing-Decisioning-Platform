@@ -24,7 +24,7 @@ class ProcessLoanApplication implements ShouldQueue
     public function handle(): void
     {
         // 1️⃣ Mark as processing
-        $this->loan->update(['status' => 'processing']);
+        $this->loan->update(['status' => 'PROCESSING']);
 
         // 2️⃣ Simulate OCR
         sleep(2);
@@ -36,7 +36,7 @@ class ProcessLoanApplication implements ShouldQueue
         sleep(2);
 
         // 5️⃣ Update final status
-        $this->loan->update(['status' => 'under_review']);
+        $this->loan->update(['status' => 'UNDER_REVIEW']);
 
         // 6️⃣ Notify user
         $this->loan->user->notify(

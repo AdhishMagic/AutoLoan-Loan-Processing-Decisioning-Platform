@@ -1,5 +1,6 @@
 @props(['type' => 'default'])
 @php
+  $type = strtolower((string) $type);
   $classes = [
     'default' => 'bg-gray-100 text-gray-800',
     'success' => 'bg-green-100 text-green-800',

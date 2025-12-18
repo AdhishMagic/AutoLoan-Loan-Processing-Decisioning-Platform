@@ -1,21 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Controller;
+use App\Events\LoanApplicationSubmitted;
 use App\Http\Requests\StoreLoanApplicationRequest;
 use App\Http\Requests\UpdateLoanApplicationRequest;
 use App\Models\LoanApplication;
-use App\Models\User;
-use App\Mail\ApplicationSubmittedMail;
-use App\Mail\LoanReceivedForVerificationMail;
-use App\Services\LoanApplicationService;
+use App\Services\Loan\LoanApplicationService;
 use App\Jobs\ProcessLoanApplication;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class LoanApplicationController extends Controller
@@ -66,7 +64,7 @@ class LoanApplicationController extends Controller
     {
         Gate::authorize('update', $loan);
 
-        $sendSubmissionEmails = ($step === 8);
+        $dispatchSubmittedEvent = ($step === 8);
 
         try {
             DB::transaction(function () use ($loan, $step, $request) {
@@ -277,21 +275,8 @@ class LoanApplicationController extends Controller
             throw $e;
         }
 
-        if ($sendSubmissionEmails) {
-            $loan->loadMissing(['user', 'applicants']);
-
-            if (!empty($loan->user?->email)) {
-                Mail::to($loan->user->email)->queue(new ApplicationSubmittedMail($loan));
-            }
-
-            $officers = User::query()
-                ->whereHas('role', fn ($q) => $q->where('name', 'manager'))
-                ->whereNotNull('email')
-                ->get(['id', 'email']);
-
-            foreach ($officers as $officer) {
-                Mail::to($officer->email)->queue(new LoanReceivedForVerificationMail($loan));
-            }
+        if ($dispatchSubmittedEvent) {
+            event(new LoanApplicationSubmitted($loan));
         }
 
         // Determine Next Step

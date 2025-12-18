@@ -56,7 +56,7 @@ class LoanStatusNotification extends Notification
             'loan_id' => $this->loan->id,
             'title' => 'Loan status updated',
             'status' => $this->loan->status,
-            'amount' => $this->loan->amount ?? null,
+            'amount' => $this->loan->requested_amount ?? null,
             'message' => $this->customMessage ?: "Your loan #{$this->loan->id} is now {$this->loan->status}.",
             'link' => route('loans.show', $this->loan->id),
         ];

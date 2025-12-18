@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
-use App\Mail\LoanApprovedMail;
-use App\Mail\LoanRejectedMail;
+use App\Http\Controllers\Controller;
+use App\Events\LoanStatusUpdated;
 use App\Models\LoanApplication;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Mail;
 
 class LoanApprovalController extends Controller
 {
@@ -14,16 +13,15 @@ class LoanApprovalController extends Controller
     {
         $this->authorize('approve', $loan);
 
+        $oldStatus = (string) $loan->status;
+
         $loan->update([
             'status' => 'APPROVED',
             'approved_at' => now(),
             'approved_by' => auth()->id(),
         ]);
 
-        $loan->loadMissing('user');
-        if (!empty($loan->user?->email)) {
-            Mail::to($loan->user->email)->queue(new LoanApprovedMail($loan));
-        }
+        event(new LoanStatusUpdated($loan, $oldStatus, 'APPROVED'));
 
         return back()->with('success', 'Loan approved');
     }
@@ -32,16 +30,15 @@ class LoanApprovalController extends Controller
     {
         $this->authorize('reject', $loan);
 
+        $oldStatus = (string) $loan->status;
+
         $loan->update([
             'status' => 'REJECTED',
             'rejected_at' => now(),
             'rejected_by' => auth()->id(),
         ]);
 
-        $loan->loadMissing('user');
-        if (!empty($loan->user?->email)) {
-            Mail::to($loan->user->email)->queue(new LoanRejectedMail($loan));
-        }
+        event(new LoanStatusUpdated($loan, $oldStatus, 'REJECTED'));
 
         return back()->with('success', 'Loan rejected');
     }

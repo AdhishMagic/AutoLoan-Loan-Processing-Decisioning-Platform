@@ -16,9 +16,11 @@
                                   });
                     }
                     $totalApps = (clone $appsQuery)->count();
-                    $approved = (clone $appsQuery)->where('status', 'approved')->count();
-                    $pending = (clone $appsQuery)->where('status', 'pending')->count();
-                    $rejected = (clone $appsQuery)->where('status', 'rejected')->count();
+                    $approved = (clone $appsQuery)->whereRaw('UPPER(status) = ?', ['APPROVED'])->count();
+                    $rejected = (clone $appsQuery)->whereRaw('UPPER(status) = ?', ['REJECTED'])->count();
+                    $pending = (clone $appsQuery)
+                        ->whereRaw('UPPER(status) NOT IN (?, ?, ?)', ['DRAFT', 'APPROVED', 'REJECTED'])
+                        ->count();
                 @endphp
 
                 <div class="rounded-lg border bg-white p-4 shadow-sm">
@@ -72,12 +74,13 @@
                                 <tr>
                                     <td class="px-4 py-3 font-medium">{{ $app->reference ?? ('LA-'.str_pad($app->id, 6, '0', STR_PAD_LEFT)) }}</td>
                                     <td class="px-4 py-3">{{ $app->user?->name ?? '—' }}</td>
-                                    <td class="px-4 py-3">{{ number_format($app->loan_amount ?? 0) }}</td>
+                                    <td class="px-4 py-3">{{ number_format($app->requested_amount ?? 0) }}</td>
                                     <td class="px-4 py-3">
                                         @php($s = strtolower($app->status ?? 'pending'))
+                                        @php($label = \Illuminate\Support\Str::headline($s))
                                         <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
                                             {{ $s === 'approved' ? 'bg-emerald-50 text-emerald-700' : ($s === 'rejected' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700') }}">
-                                            {{ ucfirst($s) }}
+                                            {{ $label }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-gray-500">{{ $app->updated_at?->diffForHumans() }}</td>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Loan;
 
 use App\Models\LoanApplication;
 use App\Models\User;
@@ -14,7 +14,7 @@ class LoanApplicationService
             'loan_type' => $data['loan_type'],
             'requested_amount' => $data['requested_amount'],
             'tenure_months' => $data['tenure_months'],
-            'status' => 'draft',
+            'status' => 'DRAFT',
         ]);
     }
 

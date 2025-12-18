@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\LoanApplicationController;
-use App\Http\Controllers\LoanApprovalController;
+use App\Http\Controllers\Web\AdminUserController;
+use App\Http\Controllers\Web\LoanApplicationController;
+use App\Http\Controllers\Web\LoanApprovalController;
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\OfficerController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SupportController;
+use App\Http\Controllers\Web\OfficerController;
+use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\RoleController;
+use App\Http\Controllers\Web\SupportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
