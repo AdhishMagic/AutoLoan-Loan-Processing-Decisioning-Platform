@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
+use App\Events\LoanApproved;
+use App\Events\LoanRejected;
 use App\Events\LoanStatusUpdated;
+use App\Http\Controllers\Controller;
 use App\Models\LoanApplication;
 use Illuminate\Http\RedirectResponse;
 
@@ -22,6 +24,7 @@ class LoanApprovalController extends Controller
         ]);
 
         event(new LoanStatusUpdated($loan, $oldStatus, 'APPROVED'));
+        event(new LoanApproved($loan));
 
         return back()->with('success', 'Loan approved');
     }
@@ -39,6 +42,7 @@ class LoanApprovalController extends Controller
         ]);
 
         event(new LoanStatusUpdated($loan, $oldStatus, 'REJECTED'));
+        event(new LoanRejected($loan));
 
         return back()->with('success', 'Loan rejected');
     }

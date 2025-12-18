@@ -10,54 +10,59 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class LoanApprovedMail extends Mailable implements ShouldQueue
+class LoanSubmittedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(public LoanApplication $loan)
     {
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your loan is approved',
+            subject: 'We received your loan application',
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         $loan = $this->loan->loadMissing('user');
 
         return new Content(
-            view: 'emails.loan.approved',
+            view: 'emails.loan.submitted',
             with: [
                 'appName' => config('app.name'),
                 'appUrl' => config('app.url'),
+                'applicantName' => $this->applicantName(),
                 'applicationNumber' => (string) $loan->application_number,
-                'amount' => $loan->sanctioned_amount ?? $loan->requested_amount,
-                'tenureMonths' => $loan->sanctioned_tenure_months
-                    ?? $loan->requested_tenure_months
-                    ?? $loan->tenure_months,
+                'amount' => $loan->requested_amount,
+                'tenureMonths' => $loan->requested_tenure_months ?? $loan->tenure_months,
                 'loanShowUrl' => route('loans.show', $loan),
             ],
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
+    private function applicantName(): string
+    {
+        $primary = null;
+
+        if ($this->loan->relationLoaded('applicants')) {
+            $primary = $this->loan->applicants
+                ->firstWhere('applicant_role', 'PRIMARY');
+        } else {
+            $primary = $this->loan->primaryApplicant()->first();
+        }
+
+        $name = trim((string) ($primary?->first_name.' '.$primary?->last_name));
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        return (string) ($this->loan->user?->name ?? 'Customer');
+    }
+
     public function attachments(): array
     {
         return [];

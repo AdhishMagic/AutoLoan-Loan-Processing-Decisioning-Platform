@@ -36,11 +36,17 @@ class LoanRejectedMail extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
+        $loan = $this->loan->loadMissing('user');
+
         return new Content(
-            markdown: 'emails.loan-rejected',
+            view: 'emails.loan.rejected',
             with: [
-                'applicationNumber' => $this->loan->application_number,
-                'loanShowUrl' => route('loans.show', $this->loan),
+                'appName' => config('app.name'),
+                'appUrl' => config('app.url'),
+                'applicationNumber' => (string) $loan->application_number,
+                'amount' => $loan->requested_amount,
+                'tenureMonths' => $loan->requested_tenure_months ?? $loan->tenure_months,
+                'loanShowUrl' => route('loans.show', $loan),
             ],
         );
     }

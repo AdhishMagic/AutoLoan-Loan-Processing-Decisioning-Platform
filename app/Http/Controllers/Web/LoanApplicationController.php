@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Events\LoanApplicationSubmitted;
+use App\Events\LoanSubmitted;
 use App\Http\Requests\StoreLoanApplicationRequest;
 use App\Http\Requests\UpdateLoanApplicationRequest;
 use App\Models\LoanApplication;
@@ -277,6 +278,7 @@ class LoanApplicationController extends Controller
 
         if ($dispatchSubmittedEvent) {
             event(new LoanApplicationSubmitted($loan));
+            event(new LoanSubmitted($loan));
         }
 
         // Determine Next Step
