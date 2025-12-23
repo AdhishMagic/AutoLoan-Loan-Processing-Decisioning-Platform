@@ -14,6 +14,9 @@
                                       $q->where('status', '!=', 'DRAFT')
                                         ->orWhere('is_saved', true);
                                   });
+                    } elseif ($isOfficer) {
+                        $appsQuery->where('assigned_officer_id', $user->id)
+                                 ->whereRaw('UPPER(status) != ?', ['DRAFT']);
                     }
                     $totalApps = (clone $appsQuery)->count();
                     $approved = (clone $appsQuery)->whereRaw('UPPER(status) = ?', ['APPROVED'])->count();
@@ -88,7 +91,7 @@
                                         @if($isUser)
                                             <a href="{{ route('loans.show', $app) }}" class="text-indigo-600 hover:underline">View</a>
                                         @elseif($isOfficer)
-                                            <a href="{{ route('officer.review') }}" class="text-indigo-600 hover:underline">Review</a>
+                                            <a href="{{ route('officer.loans.show', $app) }}" class="text-indigo-600 hover:underline">Open</a>
                                         @else
                                             <a href="#" class="text-indigo-600 hover:underline">Open</a>
                                         @endif

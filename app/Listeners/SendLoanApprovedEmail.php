@@ -14,12 +14,28 @@ class SendLoanApprovedEmail implements ShouldQueue
 
     public function handle(LoanApproved $event): void
     {
-        $loan = $event->loan->loadMissing('user');
+        $loan = $event->loan->loadMissing(['user', 'assignedOfficer', 'approver']);
 
-        if (empty($loan->user?->email)) {
+        $emails = [];
+
+        if (! empty($loan->user?->email)) {
+            $emails[] = $loan->user->email;
+        }
+
+        if (! empty($loan->assignedOfficer?->email)) {
+            $emails[] = $loan->assignedOfficer->email;
+        }
+
+        if (! empty($loan->approver?->email)) {
+            $emails[] = $loan->approver->email;
+        }
+
+        $emails = array_values(array_unique(array_filter($emails)));
+
+        if (empty($emails)) {
             return;
         }
 
-        Mail::to($loan->user->email)->queue(new LoanApprovedMail($loan));
+        Mail::to($emails)->queue(new LoanApprovedMail($loan));
     }
 }

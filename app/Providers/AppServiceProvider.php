@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
             database_path('migrations/roles'),
             database_path('migrations/loans'),
             database_path('migrations/loan_documents'),
+            database_path('migrations/notifications'),
             database_path('migrations/kyc_checks'),
             database_path('migrations/credit_checks'),
             database_path('migrations/underwriting_rules'),

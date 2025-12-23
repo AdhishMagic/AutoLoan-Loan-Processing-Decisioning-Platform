@@ -6,7 +6,9 @@ use App\Events\LoanApproved;
 use App\Events\LoanApplicationSubmitted;
 use App\Events\LoanRejected;
 use App\Events\LoanSubmitted;
-use App\Events\LoanStatusUpdated;
+use App\Listeners\SendLoanApprovedNotification;
+use App\Listeners\SendLoanRejectedNotification;
+use App\Listeners\SendLoanSubmittedNotification;
 use App\Listeners\SendLoanApprovedEmail;
 use App\Listeners\SendLoanRejectedEmail;
 use App\Listeners\SendLoanSubmittedEmail;
@@ -37,12 +39,15 @@ class EventServiceProvider extends ServiceProvider
             NotifyUnderwriters::class,
         ],
         LoanSubmitted::class => [
+            SendLoanSubmittedNotification::class,
             SendLoanSubmittedEmail::class,
         ],
         LoanApproved::class => [
+            SendLoanApprovedNotification::class,
             SendLoanApprovedEmail::class,
         ],
         LoanRejected::class => [
+            SendLoanRejectedNotification::class,
             SendLoanRejectedEmail::class,
         ],
     ];

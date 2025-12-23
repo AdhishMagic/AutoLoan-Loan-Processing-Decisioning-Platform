@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateLoanApplicationRequest;
 use App\Models\LoanApplication;
 use App\Services\Loan\LoanApplicationService;
 use App\Jobs\ProcessLoanApplication;
+use App\Models\LoanDocument;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,12 +59,50 @@ class LoanApplicationController extends Controller
             return redirect()->route('loans.step.show', ['loan' => $loan->id, 'step' => $maxStep]);
         }
 
+        if ($step === 8) {
+            $loan->loadMissing(['documents']);
+
+            $documentsByType = $loan->documents->keyBy('document_type');
+            $documentTypes = [
+                LoanDocument::TYPE_AADHAAR => 'Aadhaar',
+                LoanDocument::TYPE_PAN => 'PAN',
+                LoanDocument::TYPE_INCOME_PROOF => 'Income Proof',
+                LoanDocument::TYPE_PROPERTY_DOC => 'Property Document',
+                LoanDocument::TYPE_VEHICLE_DOC => 'Vehicle Document (optional)',
+            ];
+
+            $requiredDocumentTypes = LoanDocument::requiredTypes();
+
+            return view('loans.step_' . $step, compact('loan', 'step', 'documentsByType', 'documentTypes', 'requiredDocumentTypes'));
+        }
+
         return view('loans.step_' . $step, compact('loan', 'step'));
     }
 
     public function storeStep(StoreLoanApplicationRequest $request, LoanApplication $loan, int $step): RedirectResponse
     {
         Gate::authorize('update', $loan);
+
+        if ($step === 8) {
+            $uploadedTypes = $loan->documents()->pluck('document_type')->all();
+            $missing = array_values(array_diff(LoanDocument::requiredTypes(), $uploadedTypes));
+
+            if (! empty($missing)) {
+                $labels = [
+                    LoanDocument::TYPE_AADHAAR => 'Aadhaar',
+                    LoanDocument::TYPE_PAN => 'PAN',
+                    LoanDocument::TYPE_INCOME_PROOF => 'Income Proof',
+                    LoanDocument::TYPE_PROPERTY_DOC => 'Property Document',
+                    LoanDocument::TYPE_VEHICLE_DOC => 'Vehicle Document',
+                ];
+
+                $missingLabels = array_map(fn ($t) => $labels[$t] ?? $t, $missing);
+
+                return back()->withErrors([
+                    'documents' => 'Please upload required documents before submission: '.implode(', ', $missingLabels).'.',
+                ]);
+            }
+        }
 
         $dispatchSubmittedEvent = ($step === 8);
 

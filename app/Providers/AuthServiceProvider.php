@@ -13,7 +13,7 @@ class AuthServiceProvider extends ServiceProvider
     /** @var array<class-string, class-string> */
     protected $policies = [
         LoanApplication::class => LoanApplicationPolicy::class,
-        LoanDocument::class => \App\Policies\LoanDocumentPolicy::class,
+        LoanDocument::class => \App\Http\Policies\LoanDocumentPolicy::class,
     ];
 
     public function boot(): void

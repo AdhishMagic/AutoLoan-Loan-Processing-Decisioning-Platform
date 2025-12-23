@@ -8,6 +8,8 @@ use App\Http\Controllers\Web\OfficerController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\SupportController;
+use App\Http\Controllers\LoanDocumentController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -41,6 +43,7 @@ Route::middleware('auth')->group(function () {
     // LOAN OFFICER (manager role)
     Route::middleware('role:manager')->group(function () {
         Route::get('officer/review', [OfficerController::class, 'index'])->name('officer.review');
+        Route::get('officer/loans/{loan}', [OfficerController::class, 'show'])->name('officer.loans.show');
         Route::post('loans/{loan}/approve', [LoanApprovalController::class, 'approve'])->name('loans.approve');
         Route::post('loans/{loan}/reject', [LoanApprovalController::class, 'reject'])->name('loans.reject');
         Route::post('loans/{loan}/hold', [LoanApprovalController::class, 'hold'])->name('loans.hold');
@@ -56,6 +59,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('admin/users', AdminUserController::class)->names('admin.users');
         Route::resource('admin/roles', RoleController::class)->names('admin.roles');
     });
+
+    // Loan Documents (policy-controlled)
+    Route::post('loans/{loan}/documents', [LoanDocumentController::class, 'store'])->name('loan.document.upload');
+    Route::get('loan-documents/{document}/download-link', [LoanDocumentController::class, 'signedDownloadLink'])->name('loan.document.signed-link');
+    Route::get('loan-documents/{document}/download', [LoanDocumentController::class, 'download'])
+        ->middleware('signed')
+        ->name('loan.document.download');
+
+    Route::get('notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
 });
 
 require __DIR__.'/auth.php';

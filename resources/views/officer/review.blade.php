@@ -28,12 +28,17 @@
                             @forelse($loans as $loan)
                                 <tr class="border-b bg-white">
                                     <td class="px-4 py-3 font-medium">#{{ $loan->id }}</td>
-                                    <td class="px-4 py-3">{{ optional($loan->applicant)->name ?? '—' }}</td>
+                                    <td class="px-4 py-3">
+                                        {{ trim((string) optional($loan->primaryApplicant()->first())->first_name.' '.(string) optional($loan->primaryApplicant()->first())->last_name) ?: ($loan->user?->name ?? '—') }}
+                                    </td>
                                     <td class="px-4 py-3">{{ $loan->loan_type }}</td>
-                                    <td class="px-4 py-3">${{ number_format($loan->requested_amount, 2) }}</td>
+                                    <td class="px-4 py-3">₹{{ number_format((float) ($loan->requested_amount ?? 0), 2) }}</td>
                                     <td class="px-4 py-3">{{ optional($loan->submitted_at)->format('Y-m-d') ?? '—' }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
+                                            <a href="{{ route('officer.loans.show', $loan) }}" class="inline-flex items-center rounded-md bg-gray-200 px-3 py-2 text-gray-800 hover:bg-gray-300">
+                                                View
+                                            </a>
                                             <form method="POST" action="{{ route('loans.approve', $loan) }}">
                                                 @csrf
                                                 <x-primary-button type="submit">Approve</x-primary-button>

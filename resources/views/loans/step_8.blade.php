@@ -49,6 +49,103 @@
             </div>
         </dl>
 
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <h4 class="text-sm font-semibold text-gray-900">Documents (before submission)</h4>
+                <span class="text-xs text-gray-500">Allowed: PDF/JPG/PNG • Max 2MB</span>
+            </div>
+
+            @if($errors->has('documents'))
+                <div class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-700">
+                    {{ $errors->first('documents') }}
+                </div>
+            @endif
+
+            <div class="mt-3 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-600">
+                            <th class="py-2 pr-4">Type</th>
+                            <th class="py-2 pr-4">Requirement</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">File</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @foreach($documentTypes as $typeKey => $typeLabel)
+                            @php($doc = $documentsByType[$typeKey] ?? null)
+                            <tr>
+                                <td class="py-2 pr-4 font-medium">{{ $typeLabel }}</td>
+                                <td class="py-2 pr-4">
+                                    @if(in_array($typeKey, $requiredDocumentTypes ?? [], true))
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-amber-700">Required</span>
+                                    @else
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">Optional</span>
+                                    @endif
+                                </td>
+                                <td class="py-2 pr-4">
+                                    @if($doc)
+                                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">Uploaded</span>
+                                    @else
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">Not uploaded</span>
+                                    @endif
+                                </td>
+                                <td class="py-2 pr-4 text-gray-700">{{ $doc?->original_name ?? '—' }}</td>
+                                <td class="py-2 pr-4">
+                                    @if($doc)
+                                        @can('view', $doc)
+                                            <a class="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700" href="{{ route('loan.document.signed-link', $doc) }}">Download</a>
+                                            <a class="ml-2 inline-flex items-center rounded-md bg-gray-200 px-3 py-1.5 text-gray-800 hover:bg-gray-300" target="_blank" href="{{ route('loan.document.signed-link', $doc) }}?json=1">Get link</a>
+                                        @endcan
+                                    @else
+                                        <span class="text-gray-500">Upload below</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @can('create', [\App\Models\LoanDocument::class, $loan])
+                <div class="mt-4 border-t pt-4">
+                    <h5 class="text-sm font-semibold text-gray-900">Upload / Replace a document</h5>
+
+                    <form method="POST" action="{{ route('loan.document.upload', $loan) }}" enctype="multipart/form-data" class="mt-3">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Document Type</label>
+                                <select name="document_type" class="mt-1 block w-full border-gray-300 rounded">
+                                    @foreach($documentTypes as $typeKey => $typeLabel)
+                                        <option value="{{ $typeKey }}">
+                                            {{ $typeLabel }}{{ in_array($typeKey, $requiredDocumentTypes ?? [], true) ? ' (required)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('document_type')
+                                    <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">File</label>
+                                <input type="file" name="file" accept="application/pdf,image/jpeg,image/png" class="mt-1 block w-full" required>
+                                @error('file')
+                                    <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="flex items-end">
+                                <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">Upload</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            @endcan
+        </div>
+
         <form method="POST" action="{{ route('loans.step.store', ['loan' => $loan->id, 'step' => 8]) }}" class="space-y-8 pt-8 border-t">
             @csrf
             

@@ -1,59 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AutoLoan — Loan Processing & Decisioning Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+AutoLoan is a role-based loan application and decisioning platform with:
+- An 8-step borrower wizard (draft/save/resume + final submit)
+- Loan officer review workflow (approve/reject/hold)
+- Secure document upload + time-limited downloads
+- Event-driven emails + in-app notifications
 
-## About Laravel
+## Process Coverage (Concept + Logic)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This section maps the key platform “processes” (conceptually) to where the logic currently lives in the codebase.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1) Authentication (SSO + login)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Status:** Implemented (web login + Google SSO)
 
-## Learning Laravel
+- Session-based auth flows (register/login/email-verify) are defined in [routes/auth.php](routes/auth.php)
+- Google OAuth SSO flow is implemented in [app/Http/Controllers/Auth/GoogleAuthController.php](app/Http/Controllers/Auth/GoogleAuthController.php) and wired in [routes/web.php](routes/web.php)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Token-based API auth:** Not currently wired for API routes (current API is just a health endpoint in [routes/api.php](routes/api.php)).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2) Authorization (roles + policies/gates)
 
-## Laravel Sponsors
+**Status:** Implemented
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- Role middleware enforcement via [app/Http/Middleware/RoleMiddleware.php](app/Http/Middleware/RoleMiddleware.php) and role-based route groups in [routes/web.php](routes/web.php)
+- Loan application authorization rules via [app/Policies/LoanApplicationPolicy.php](app/Policies/LoanApplicationPolicy.php) and registration in [app/Providers/AuthServiceProvider.php](app/Providers/AuthServiceProvider.php)
+- Document authorization rules via [app/Http/Policies/LoanDocumentPolicy.php](app/Http/Policies/LoanDocumentPolicy.php)
+- Policy enforcement is used via `Gate::authorize(...)` and `$this->authorize(...)` in controllers
 
-### Premium Partners
+### 3) Queues, Jobs & Background processing
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Status:** Implemented (asynchronous pattern)
 
-## Contributing
+- Background processing job: [app/Jobs/ProcessLoanApplication.php](app/Jobs/ProcessLoanApplication.php)
+- Dispatched on final submit (step 8) in [app/Http/Controllers/Web/LoanApplicationController.php](app/Http/Controllers/Web/LoanApplicationController.php)
+- Emails are queued (non-blocking) via `->queue(...)` in listeners under [app/Listeners](app/Listeners)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4) Scheduling (periodic tasks)
 
-## Code of Conduct
+**Status:** Not implemented yet (no app-level scheduled tasks defined)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Conceptually, scheduling is where you’d define periodic jobs (cleanup, reminders, reconciliation). The project currently relies on event-driven and on-demand processing rather than time-based scheduling.
 
-## Security Vulnerabilities
+### 5) Events & Listeners (decoupled workflow)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Status:** Implemented (event-driven architecture)
 
-## License
+- Domain events: [app/Events](app/Events)
+- Listener wiring: [app/Providers/EventServiceProvider.php](app/Providers/EventServiceProvider.php)
+- On submit: emits `LoanApplicationSubmitted` + `LoanSubmitted`
+- On decisions: emits `LoanApproved` / `LoanRejected` and `LoanStatusUpdated`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Broadcasting / realtime push:** Not implemented (events are currently internal and handled by listeners, not broadcast to clients).
+
+### 6) Notifications & Mail (user-facing comms)
+
+**Status:** Implemented
+
+- Database in-app notifications via [app/Notifications/LoanStatusNotification.php](app/Notifications/LoanStatusNotification.php)
+- Notifications are created for both applicant and officer via listeners:
+	- [app/Listeners/SendLoanSubmittedNotification.php](app/Listeners/SendLoanSubmittedNotification.php)
+	- [app/Listeners/SendLoanApprovedNotification.php](app/Listeners/SendLoanApprovedNotification.php)
+	- [app/Listeners/SendLoanRejectedNotification.php](app/Listeners/SendLoanRejectedNotification.php)
+- Navbar bell displays unread count + recent notifications in [resources/views/layouts/partials/navbar.blade.php](resources/views/layouts/partials/navbar.blade.php)
+- Clicking a notification marks it read and redirects via [app/Http/Controllers/NotificationController.php](app/Http/Controllers/NotificationController.php) and [routes/web.php](routes/web.php)
+
+### 7) Storage & Signed URLs (secure documents)
+
+**Status:** Implemented
+
+- Private document storage uses local disk + per-loan folders and is enforced in [app/Http/Controllers/LoanDocumentController.php](app/Http/Controllers/LoanDocumentController.php)
+- Time-limited downloads use signed routes (temporary signed links + signature validation)
+- Upload is integrated into wizard step 8 (pre-submit) in [resources/views/loans/step_8.blade.php](resources/views/loans/step_8.blade.php)
+
+## Notes
+
+- The repo is intentionally structured so the *logic* is portable: you can swap the underlying implementation details later (e.g., how tokens are issued, queue backend, or where files are stored) without changing the business workflow.

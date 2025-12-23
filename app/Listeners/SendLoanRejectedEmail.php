@@ -14,12 +14,28 @@ class SendLoanRejectedEmail implements ShouldQueue
 
     public function handle(LoanRejected $event): void
     {
-        $loan = $event->loan->loadMissing('user');
+        $loan = $event->loan->loadMissing(['user', 'assignedOfficer', 'rejecter']);
 
-        if (empty($loan->user?->email)) {
+        $emails = [];
+
+        if (! empty($loan->user?->email)) {
+            $emails[] = $loan->user->email;
+        }
+
+        if (! empty($loan->assignedOfficer?->email)) {
+            $emails[] = $loan->assignedOfficer->email;
+        }
+
+        if (! empty($loan->rejecter?->email)) {
+            $emails[] = $loan->rejecter->email;
+        }
+
+        $emails = array_values(array_unique(array_filter($emails)));
+
+        if (empty($emails)) {
             return;
         }
 
-        Mail::to($loan->user->email)->queue(new LoanRejectedMail($loan));
+        Mail::to($emails)->queue(new LoanRejectedMail($loan));
     }
 }
