@@ -62,6 +62,16 @@ class LoanDocument extends Model
         'document_type',
         'file_path',
         'original_name',
+        'ocr_text',
+        'ocr_normalized_text',
+        'ocr_hash',
+        'extracted_data',
+        'verification_result',
+        'authenticity_score',
+        'uniqueness_score',
+        'trust_score',
+        'analyzed_at',
+        'analysis_version',
         'verified_by',
         'verified_at',
     ];
@@ -69,6 +79,9 @@ class LoanDocument extends Model
     /** @var array<string, string> */
     protected $casts = [
         'verified_at' => 'datetime',
+        'analyzed_at' => 'datetime',
+        'extracted_data' => 'array',
+        'verification_result' => 'array',
     ];
 
     /**
