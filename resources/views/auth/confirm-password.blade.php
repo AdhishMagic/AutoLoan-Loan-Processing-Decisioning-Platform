@@ -1,3 +1,4 @@
+{{-- Page: Password confirmation (guest layout). Used before sensitive actions (e.g., changing password). --}}
 <x-guest-layout>
     <div class="mb-4 text-sm text-gray-600">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}

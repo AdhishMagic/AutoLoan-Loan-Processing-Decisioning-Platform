@@ -11,7 +11,12 @@ use Illuminate\Validation\Rules\Password;
 class PasswordController extends Controller
 {
     /**
-     * Update the user's password.
+     * Update the authenticated user's password.
+     *
+     * Validates the current password, enforces the default password rules,
+     * hashes the new password, and persists it on the user record.
+     *
+     * On success, redirects back with a status flash message used by the UI.
      */
     public function update(Request $request): RedirectResponse
     {

@@ -1,3 +1,4 @@
+{{-- Page: Public landing page (/) with links to login/dashboard. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>

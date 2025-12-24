@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Create the `job_logs` table for background job run tracking.
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

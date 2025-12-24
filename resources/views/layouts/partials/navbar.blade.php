@@ -11,6 +11,9 @@
       <div class="hidden md:flex items-center gap-2">
         @auth
           <a href="{{ route('dashboard') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
+          @if (Auth::user()->isLoanOfficer())
+            <a href="{{ route('officer.underwriting.rules.index') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Underwriting Rules</a>
+          @endif
           @if (Auth::user()->isUser())
             <a href="{{ route('loans.create') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Apply for Auto Loan</a>
             <a href="{{ route('loans.index') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">My Loan Applications</a>
@@ -22,6 +25,9 @@
       <div class="md:hidden flex items-center">
         @auth
           <a href="{{ route('dashboard') }}" class="rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Home</a>
+          @if (Auth::user()->isLoanOfficer())
+            <a href="{{ route('officer.underwriting.rules.index') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Rules</a>
+          @endif
           @if (Auth::user()->isUser())
             <a href="{{ route('loans.index') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Loans</a>
             <a href="{{ route('loans.create') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-white bg-indigo-600 hover:bg-indigo-700">Apply</a>

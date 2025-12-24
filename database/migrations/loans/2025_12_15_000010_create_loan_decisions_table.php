@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Create the `loan_decisions` table (approve/reject/hold outcomes).
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

@@ -3,6 +3,7 @@
         <div class="border-b border-gray-200 pb-5">
             <h3 class="text-base font-semibold leading-6 text-gray-900">Step 5: Property Details</h3>
             <p class="mt-2 text-sm text-gray-500">Details of the property to be financed or mortgaged.</p>
+            <p class="mt-1 text-sm text-gray-500">Fields marked <span class="text-red-500">*</span> are mandatory.</p>
         </div>
 
         <form method="POST" action="{{ route('loans.step.store', ['loan' => $loan->id, 'step' => 5]) }}" class="space-y-8">
@@ -13,23 +14,34 @@
                  <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b pb-2">Property Information</h4>
                  <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Property Type</label>
-                        <select name="property_type" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                            <option>Apartment / Flat</option>
-                            <option>Independent House / Villa</option>
-                            <option>Plot / Land</option>
-                            <option>Commercial Office</option>
+                        <label for="property_type" class="block text-sm font-medium text-gray-900">Property Type <span class="text-red-500">*</span></label>
+                        <select id="property_type" name="property_type" required class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            <option value="">Select property type</option>
+                            <option value="RESIDENTIAL_FLAT" @selected(old('property_type')==='RESIDENTIAL_FLAT')>Residential Flat / Apartment</option>
+                            <option value="RESIDENTIAL_VILLA" @selected(old('property_type')==='RESIDENTIAL_VILLA')>Residential Villa</option>
+                            <option value="RESIDENTIAL_BUNGALOW" @selected(old('property_type')==='RESIDENTIAL_BUNGALOW')>Residential Bungalow</option>
+                            <option value="RESIDENTIAL_PLOT" @selected(old('property_type')==='RESIDENTIAL_PLOT')>Residential Plot</option>
+                            <option value="COMMERCIAL_OFFICE" @selected(old('property_type')==='COMMERCIAL_OFFICE')>Commercial Office</option>
+                            <option value="COMMERCIAL_SHOP" @selected(old('property_type')==='COMMERCIAL_SHOP')>Commercial Shop</option>
+                            <option value="COMMERCIAL_PLOT" @selected(old('property_type')==='COMMERCIAL_PLOT')>Commercial Plot</option>
+                            <option value="INDUSTRIAL" @selected(old('property_type')==='INDUSTRIAL')>Industrial</option>
+                            <option value="AGRICULTURAL" @selected(old('property_type')==='AGRICULTURAL')>Agricultural</option>
+                            <option value="MIXED_USE" @selected(old('property_type')==='MIXED_USE')>Mixed Use</option>
+                            <option value="OTHER" @selected(old('property_type')==='OTHER')>Other</option>
                         </select>
                     </div>
                      <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Construction Status</label>
-                        <select name="construction_status" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                            <option>Ready to Move</option>
-                            <option>Under Construction</option>
+                        <label for="construction_status" class="block text-sm font-medium text-gray-900">Construction Status <span class="text-red-500">*</span></label>
+                        <select id="construction_status" name="construction_status" required class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            <option value="">Select status</option>
+                            <option value="READY_TO_MOVE" @selected(old('construction_status')==='READY_TO_MOVE')>Ready to Move</option>
+                            <option value="UNDER_CONSTRUCTION" @selected(old('construction_status')==='UNDER_CONSTRUCTION')>Under Construction</option>
+                            <option value="NEW_BOOKING" @selected(old('construction_status')==='NEW_BOOKING')>New Booking</option>
+                            <option value="RESALE" @selected(old('construction_status')==='RESALE')>Resale</option>
                         </select>
                     </div>
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Ownership Type</label>
+                        <label for="ownership_type" class="block text-sm font-medium text-gray-900">Ownership Type <span class="text-red-500">*</span></label>
                         <select name="ownership_type" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" required>
                             <option value="">Select ownership</option>
                             <option value="SELF" {{ old('ownership_type')==='SELF' ? 'selected' : '' }}>Self</option>
@@ -45,8 +57,8 @@
                         @enderror
                     </div>
                      <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Market Value (₹)</label>
-                         <input type="number" name="market_value" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                <label for="market_value" class="block text-sm font-medium text-gray-900">Market Value (₹) <span class="text-red-500">*</span></label>
+                                 <input id="market_value" type="number" name="market_value" required value="{{ old('market_value') }}" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                  </div>
             </div>

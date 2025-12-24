@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Create the `notifications` table (Laravel notification system).
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,18 +15,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('notifications')) {
-            return;
-        }
-
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('type');
-            $table->morphs('notifiable');
-            $table->text('data');
-            $table->timestamp('read_at')->nullable();
-            $table->timestamps();
-        });
+        // No-op.
+        // Canonical notifications migration lives in:
+        // database/migrations/users/2025_12_15_000012_create_notifications_table.php
+        // Keeping this legacy migration as a no-op avoids duplicate table creation
+        // while preserving migration history for existing environments.
     }
 
     /**
@@ -30,6 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        // No-op.
+        // The canonical migration is responsible for creating/dropping the table.
     }
 };

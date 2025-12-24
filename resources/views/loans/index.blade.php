@@ -1,3 +1,4 @@
+{{-- Page: Borrower loan applications list (resource index). Shows drafts/submitted and bulk delete for owner. --}}
 @extends('layouts.app')
 
 @section('content')

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Add the `is_saved` flag to the `loan_applications` table (draft/resume UX).
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

@@ -4,9 +4,12 @@
             <div>
                 <h3 class="text-base font-semibold leading-6 text-gray-900">Step 2: Applicants</h3>
                 <p class="mt-2 text-sm text-gray-500">Tell us about yourself and any co-applicants.</p>
+                <p class="mt-1 text-sm text-gray-500">Fields marked <span class="text-red-500">*</span> are mandatory.</p>
             </div>
             <button type="button" class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">+ Add Co-Applicant</button>
         </div>
+
+        @php($primaryApplicant = $loan->primaryApplicant()->first())
 
         <!-- Applicant Tabs -->
         <div class="hidden sm:block">
@@ -32,42 +35,45 @@
                 <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b pb-2">Personal Information</h4>
                 <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">First Name</label>
-                        <input type="text" name="first_name" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="first_name" class="block text-sm font-medium text-gray-900">First Name <span class="text-red-500">*</span></label>
+                        <input id="first_name" type="text" name="first_name" required value="{{ old('first_name', $primaryApplicant?->first_name) }}" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Last Name</label>
-                        <input type="text" name="last_name" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="last_name" class="block text-sm font-medium text-gray-900">Last Name <span class="text-red-500">*</span></label>
+                        <input id="last_name" type="text" name="last_name" required value="{{ old('last_name', $primaryApplicant?->last_name) }}" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-900">Date of Birth</label>
-                        <input type="date" name="date_of_birth" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="date_of_birth" class="block text-sm font-medium text-gray-900">Date of Birth <span class="text-red-500">*</span></label>
+                        <input id="date_of_birth" type="date" name="date_of_birth" required value="{{ old('date_of_birth', optional($primaryApplicant?->date_of_birth)->format('Y-m-d')) }}" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-900">Gender</label>
-                        <select name="gender" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
+                        <label for="gender" class="block text-sm font-medium text-gray-900">Gender <span class="text-red-500">*</span></label>
+                        <select id="gender" name="gender" required class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            <option value="">Select</option>
+                            <option value="MALE" @selected(old('gender', $primaryApplicant?->gender) === 'MALE')>Male</option>
+                            <option value="FEMALE" @selected(old('gender', $primaryApplicant?->gender) === 'FEMALE')>Female</option>
+                            <option value="OTHER" @selected(old('gender', $primaryApplicant?->gender) === 'OTHER')>Other</option>
                         </select>
                     </div>
                      <div class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-900">Marital Status</label>
-                        <select name="marital_status" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                            <option>Single</option>
-                            <option>Married</option>
-                            <option>Divorced</option>
+                        <label for="marital_status" class="block text-sm font-medium text-gray-900">Marital Status <span class="text-red-500">*</span></label>
+                        <select id="marital_status" name="marital_status" required class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            <option value="">Select</option>
+                            <option value="SINGLE" @selected(old('marital_status', $primaryApplicant?->marital_status) === 'SINGLE')>Single</option>
+                            <option value="MARRIED" @selected(old('marital_status', $primaryApplicant?->marital_status) === 'MARRIED')>Married</option>
+                            <option value="DIVORCED" @selected(old('marital_status', $primaryApplicant?->marital_status) === 'DIVORCED')>Divorced</option>
+                            <option value="WIDOWED" @selected(old('marital_status', $primaryApplicant?->marital_status) === 'WIDOWED')>Widowed</option>
                         </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6 mt-6">
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Mobile Number</label>
-                        <input type="text" name="mobile" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="mobile" class="block text-sm font-medium text-gray-900">Mobile Number <span class="text-red-500">*</span></label>
+                        <input id="mobile" type="tel" name="mobile" required value="{{ old('mobile', $primaryApplicant?->mobile) }}" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Email Address</label>
-                        <input type="email" name="email" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="email" class="block text-sm font-medium text-gray-900">Email Address <span class="text-red-500">*</span></label>
+                        <input id="email" type="email" name="email" required value="{{ old('email', $primaryApplicant?->email) }}" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                 </div>
             </div>
@@ -77,12 +83,12 @@
                 <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b pb-2">Identity Proofs (KYC)</h4>
                 <div class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
                      <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">PAN Number</label>
-                        <input type="text" name="pan_number" placeholder="ABCDE1234F" class="mt-2 block w-full uppercase rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="pan_number" class="block text-sm font-medium text-gray-900">PAN Number <span class="text-red-500">*</span></label>
+                        <input id="pan_number" type="text" name="pan_number" required value="{{ old('pan_number', $primaryApplicant?->pan_number) }}" placeholder="ABCDE1234F" class="mt-2 block w-full uppercase rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-900">Aadhaar Number</label>
-                        <input type="text" name="aadhaar_number" placeholder="1234 5678 9012" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                        <label for="aadhaar_number" class="block text-sm font-medium text-gray-900">Aadhaar Number <span class="text-red-500">*</span></label>
+                        <input id="aadhaar_number" type="text" name="aadhaar_number" required value="{{ old('aadhaar_number', $primaryApplicant?->aadhaar_number) }}" placeholder="1234 5678 9012" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                 </div>
             </div>

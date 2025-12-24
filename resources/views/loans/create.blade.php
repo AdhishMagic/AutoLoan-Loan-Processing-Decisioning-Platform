@@ -1,3 +1,4 @@
+{{-- Page: Borrower creates a new loan application (resource create). Starts the wizard and persists an initial record. --}}
 @extends('layouts.app')
 
 @section('content')

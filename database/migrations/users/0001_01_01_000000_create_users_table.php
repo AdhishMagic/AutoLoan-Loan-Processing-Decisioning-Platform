@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Create core auth tables (`users`, `password_reset_tokens`, `sessions`).
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

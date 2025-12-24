@@ -1,3 +1,4 @@
+{{-- Page: Authenticated dashboard (/dashboard). Shows application stats and quick actions based on role. --}}
 <x-app-layout>
     <div class="py-6">
         <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -55,6 +56,19 @@
                     @endif
                 </div>
             </div>
+
+            @if($isUser)
+                <div class="mb-6 rounded-md border border-blue-200 bg-blue-50 p-4">
+                    <div class="text-sm font-medium text-blue-800">Auto Loan application — required inputs</div>
+                    <div class="mt-1 text-sm text-blue-700">In the application wizard, fields marked <span class="text-red-500">*</span> are mandatory.</div>
+                    <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-blue-700 sm:grid-cols-2">
+                        <div>Step 1: Product type, requested amount, tenure</div>
+                        <div>Step 2: Name, DOB, PAN, Aadhaar, mobile, email, gender, marital status</div>
+                        <div>Step 3: Employment type, gross income</div>
+                        <div>Step 7–8: Mandatory consents and required documents</div>
+                    </div>
+                </div>
+            @endif
 
             <div class="overflow-hidden rounded-lg border bg-white shadow-sm">
                 <div class="relative overflow-x-auto">

@@ -1,3 +1,4 @@
+{{-- Page: Registration form (guest-only). Creates a new user account. --}}
 <x-guest-layout>
     <form method="POST" action="{{ route('register') }}">
         @csrf

@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\OfficerController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\SupportController;
+use App\Http\Controllers\Web\UnderwritingRuleController;
 use App\Http\Controllers\LoanDocumentController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,26 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('admin/users', AdminUserController::class)->names('admin.users');
         Route::resource('admin/roles', RoleController::class)->names('admin.roles');
+
+        // Underwriting rule management (admin)
+        Route::get('admin/underwriting/rules', [UnderwritingRuleController::class, 'index'])->name('underwriting.rules.index');
+        Route::get('admin/underwriting/rules/{rule}/edit', [UnderwritingRuleController::class, 'edit'])->name('underwriting.rules.edit');
+        Route::put('admin/underwriting/rules/{rule}', [UnderwritingRuleController::class, 'update'])->name('underwriting.rules.update');
+        Route::post('admin/underwriting/rules/{rule}/activate', [UnderwritingRuleController::class, 'activate'])->name('underwriting.rules.activate');
+        Route::post('admin/underwriting/rules/{rule}/deactivate', [UnderwritingRuleController::class, 'deactivate'])->name('underwriting.rules.deactivate');
+        Route::post('admin/underwriting/rules/{rule}/test', [UnderwritingRuleController::class, 'test'])->name('underwriting.rules.test');
+    });
+
+    // LOAN OFFICER (manager role) - manage rules (create/update/activate/test)
+    Route::middleware('role:manager')->group(function () {
+        Route::get('officer/underwriting/rules', [UnderwritingRuleController::class, 'index'])->name('officer.underwriting.rules.index');
+        Route::get('officer/underwriting/rules/create', [UnderwritingRuleController::class, 'create'])->name('officer.underwriting.rules.create');
+        Route::post('officer/underwriting/rules', [UnderwritingRuleController::class, 'store'])->name('officer.underwriting.rules.store');
+        Route::get('officer/underwriting/rules/{rule}/edit', [UnderwritingRuleController::class, 'edit'])->name('officer.underwriting.rules.edit');
+        Route::put('officer/underwriting/rules/{rule}', [UnderwritingRuleController::class, 'update'])->name('officer.underwriting.rules.update');
+        Route::post('officer/underwriting/rules/{rule}/activate', [UnderwritingRuleController::class, 'activate'])->name('officer.underwriting.rules.activate');
+        Route::post('officer/underwriting/rules/{rule}/deactivate', [UnderwritingRuleController::class, 'deactivate'])->name('officer.underwriting.rules.deactivate');
+        Route::post('officer/underwriting/rules/{rule}/test', [UnderwritingRuleController::class, 'test'])->name('officer.underwriting.rules.test');
     });
 
     // Loan Documents (policy-controlled)

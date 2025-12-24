@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Add approver/decision tracking columns to the `loan_applications` table.
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

@@ -1,3 +1,4 @@
+{{-- Page: Password reset form (guest-only). Requires token + email and sets a new password. --}}
 <x-guest-layout>
     <form method="POST" action="{{ route('password.store') }}">
         @csrf

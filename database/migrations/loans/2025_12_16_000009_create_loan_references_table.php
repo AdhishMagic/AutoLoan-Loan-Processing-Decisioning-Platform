@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Create the `loan_references` table.
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

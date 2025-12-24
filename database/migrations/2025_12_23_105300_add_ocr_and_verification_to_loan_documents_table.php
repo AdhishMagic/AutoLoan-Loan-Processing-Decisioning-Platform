@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Migration: Add OCR and verification fields to the `loan_documents` table.
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

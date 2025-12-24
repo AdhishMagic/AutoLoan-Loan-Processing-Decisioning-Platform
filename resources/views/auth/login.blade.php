@@ -1,3 +1,4 @@
+{{-- Page: Login form (guest-only). Submits credentials to the session auth endpoint. --}}
 <x-guest-layout>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
