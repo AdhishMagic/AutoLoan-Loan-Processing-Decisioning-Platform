@@ -146,6 +146,17 @@ class StoreLoanApplicationRequest extends FormRequest
             ];
         }
 
+        // Step 4: Financials (Bank Account)
+        if ($step === 4) {
+            $rules = [
+                'account_number' => ['required', 'string', 'max:30'],
+                'account_holder_name' => ['required', 'string', 'max:200'],
+                'bank_name' => ['required', 'string', 'max:200'],
+                'account_type' => ['required', 'in:SAVINGS,CURRENT,SALARY,OVERDRAFT,CASH_CREDIT,NRE,NRO'],
+                'ifsc_code' => ['required', 'string', 'max:11'],
+            ];
+        }
+
         // Step 5: Property
         if ($step === 5) {
              $rules = [
@@ -168,6 +179,16 @@ class StoreLoanApplicationRequest extends FormRequest
                 'ref_1_relation' => ['nullable', 'in:FATHER,MOTHER,BROTHER,SISTER,SPOUSE,FRIEND,COLLEAGUE,MANAGER,NEIGHBOR,BUSINESS_ASSOCIATE,OTHER'],
                 'ref_1_mobile' => ['nullable', 'digits:10'],
                 'ref_1_address' => ['nullable', 'string', 'max:500'],
+            ];
+        }
+
+        // Step 7: Declarations & Consents
+        if ($step === 7) {
+            $rules = [
+                'pep' => ['nullable', 'boolean'],
+                'resident' => ['nullable', 'boolean'],
+                'cibil' => ['required', 'accepted'],
+                'privacy' => ['required', 'accepted'],
             ];
         }
 

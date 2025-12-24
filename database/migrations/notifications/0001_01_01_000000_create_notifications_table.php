@@ -15,11 +15,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // No-op.
-        // Canonical notifications migration lives in:
-        // database/migrations/users/2025_12_15_000012_create_notifications_table.php
-        // Keeping this legacy migration as a no-op avoids duplicate table creation
-        // while preserving migration history for existing environments.
+        if (Schema::hasTable('notifications')) {
+            return;
+        }
+
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -27,7 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // No-op.
-        // The canonical migration is responsible for creating/dropping the table.
+        Schema::dropIfExists('notifications');
     }
 };

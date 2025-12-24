@@ -12,14 +12,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // No-op.
-        // Canonical loan_documents migration lives in:
-        // database/migrations/create_loan_documents_table.php
-        // Keeping this file as a no-op avoids duplicate table creation.
+        Schema::create('loan_documents', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->uuid('loan_application_id');
+            $table->string('document_type', 50);
+            $table->string('file_path', 255);
+            $table->unsignedBigInteger('verified_by')->nullable();
+            $table->timestamp('verified_at')->nullable();
+            $table->timestamps();
+
+            $table->foreign('loan_application_id')->references('id')->on('loan_applications')->onDelete('cascade');
+            $table->foreign('verified_by')->references('id')->on('users');
+        });
     }
 
     public function down(): void
     {
-        // No-op.
+        Schema::dropIfExists('loan_documents');
     }
 };

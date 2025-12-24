@@ -18,11 +18,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // No-op.
-        // Canonical loan_applications migration lives in:
-        // database/migrations/loans/2025_12_15_000005_create_loan_applications_table.php
-        // Keeping this file as a no-op preserves migration history and avoids unsafe
-        // drop/rename behavior on rollback.
+        // No-op: initial create migration now uses UUID. This update is skipped.
+        if (! Schema::hasTable('loan_applications')) {
+            Schema::create('loan_applications', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->timestamps();
+            });
+        }
+        // If the table already exists (created by earlier migration), skip updates to avoid duplicates.
+        if (Schema::hasTable('loan_applications')) {
+            return;
+        }
+        
     }
 
     /**
@@ -30,6 +37,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // No-op.
+        Schema::dropIfExists('loan_applications');
+        Schema::rename('loan_applications_old', 'loan_applications');
+        
+        // Restore original indexes
+        Schema::table('loan_applications', function (Blueprint $table) {
+            $table->index('status', 'idx_loan_status');
+            $table->index('user_id', 'idx_loan_user');
+        });
     }
 };

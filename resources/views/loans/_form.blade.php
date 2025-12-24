@@ -1,5 +1,5 @@
 @php($editing = isset($loan))
-<div x-data="{ step: 1, maxStep: 4, next(){ if(this.step < this.maxStep) this.step++ }, prev(){ if(this.step>1) this.step-- }, goto(s){ if(s>=1 && s<=this.maxStep) this.step=s } }" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div x-data="{ step: @json($step ?? 1), maxStep: 8, next(){ if(this.step < this.maxStep) this.step++ }, prev(){ if(this.step>1) this.step-- }, goto(s){ if(s>=1 && s<=this.maxStep) this.step=s } }" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <!-- Left column: step content -->
   <div class="lg:col-span-2 space-y-6">
     <!-- Step 1: Details -->

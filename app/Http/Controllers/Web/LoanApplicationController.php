@@ -61,6 +61,7 @@ class LoanApplicationController extends Controller
 
         if ($step === 8) {
             $loan->loadMissing(['documents']);
+            $primaryApplicant = $loan->primaryApplicant()->first();
 
             $documentsByType = $loan->documents->keyBy('document_type');
             $documentTypes = [
@@ -73,10 +74,11 @@ class LoanApplicationController extends Controller
 
             $requiredDocumentTypes = LoanDocument::requiredTypes();
 
-            return view('loans.step_' . $step, compact('loan', 'step', 'documentsByType', 'documentTypes', 'requiredDocumentTypes'));
+            return view('loans.step_' . $step, compact('loan', 'step', 'primaryApplicant', 'documentsByType', 'documentTypes', 'requiredDocumentTypes'));
         }
 
-        return view('loans.step_' . $step, compact('loan', 'step'));
+        $primaryApplicant = $loan->primaryApplicant()->first();
+        return view('loans.step_' . $step, compact('loan', 'step', 'primaryApplicant'));
     }
 
     public function storeStep(StoreLoanApplicationRequest $request, LoanApplication $loan, int $step): RedirectResponse
@@ -178,9 +180,13 @@ class LoanApplicationController extends Controller
                 case 4: // Financials (Bank)
                      $applicant = $loan->primaryApplicant()->first();
                      if ($applicant && $request->filled('account_number')) {
+                         $accountHolder = $request->input('account_holder_name') ?: $applicant->full_name;
                          $applicant->bankAccounts()->updateOrCreate(
                              ['account_number' => $request->account_number],
-                             $request->only(['bank_name', 'account_type', 'ifsc_code'])
+                             array_merge(
+                                 $request->only(['bank_name', 'account_type', 'ifsc_code', 'account_number']),
+                                 ['account_holder_name' => $accountHolder]
+                             )
                          );
                      }
                      // Repeater logic for existing loans would be handled here (skipping for brevity but acknowledged)
