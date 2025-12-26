@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthTokenController;
 use App\Http\Controllers\Api\LoanController;
+use App\Http\Controllers\Api\MeController;
 use App\Models\LoanApplication;
 
 Route::get('/health', function (Request $request) {
@@ -16,16 +17,7 @@ Route::post('/login', [AuthTokenController::class, 'store']);
 Route::delete('/token', [AuthTokenController::class, 'destroy'])->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'api.otp', 'throttle:api'])->group(function () {
-    Route::get('/me', function (Request $request) {
-        $user = $request->user();
-
-        return response()->json([
-            'id' => $user?->id,
-            'name' => $user?->name,
-            'email' => $user?->email,
-            'role' => $user?->role?->name,
-        ]);
-    });
+    Route::get('/me', [MeController::class, 'show']);
 
     // Example: borrower can fetch their own applications via API
     Route::get('/loans', function (Request $request) {
@@ -51,6 +43,8 @@ Route::middleware(['auth:sanctum', 'api.otp', 'throttle:api'])->group(function (
     // Production-ready endpoints
     Route::post('/loans', [LoanController::class, 'store']);
     Route::get('/loans/{loan}', [LoanController::class, 'show']);
+    Route::get('/loans/{loan}/status', [LoanController::class, 'status']);
+    Route::get('/loans/{loan}/kyc', [LoanController::class, 'kyc']);
     Route::get('/loans/{loan}/documents/{filename}', [LoanController::class, 'downloadDocument'])
         ->where('filename', '.*');
 });

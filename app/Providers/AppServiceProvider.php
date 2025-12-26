@@ -2,11 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\Applicant;
 use App\Models\LoanApplication;
 use App\Models\LoanDocument;
+use App\Models\User;
+use App\Observers\ApplicantObserver;
 use App\Observers\LoanApplicationObserver;
 use App\Observers\LoanDocumentObserver;
+use App\Observers\UserObserver;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +30,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('mail', function () {
+            return Limit::perSecond(1);
+        });
+
         $this->loadMigrationsFrom([
             database_path('migrations/users'),
             database_path('migrations/roles'),
@@ -39,6 +49,9 @@ class AppServiceProvider extends ServiceProvider
         // Register model observers
         LoanApplication::observe(LoanApplicationObserver::class);
         LoanDocument::observe(LoanDocumentObserver::class);
+
+        Applicant::observe(ApplicantObserver::class);
+        User::observe(UserObserver::class);
 
         // Blade role helpers: @role('admin') ... @endrole, @anyrole('admin','manager')
         Blade::if('role', function (string $role): bool {

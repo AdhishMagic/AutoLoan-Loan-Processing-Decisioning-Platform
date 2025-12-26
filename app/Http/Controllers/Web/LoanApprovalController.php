@@ -7,10 +7,15 @@ use App\Events\LoanRejected;
 use App\Events\LoanStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\LoanApplication;
+use App\Services\LoanCacheService;
 use Illuminate\Http\RedirectResponse;
 
 class LoanApprovalController extends Controller
 {
+    public function __construct(private readonly LoanCacheService $cache)
+    {
+    }
+
     public function approve(LoanApplication $loan): RedirectResponse
     {
         $this->authorize('approve', $loan);
@@ -25,6 +30,9 @@ class LoanApprovalController extends Controller
 
         event(new LoanStatusUpdated($loan, $oldStatus, 'APPROVED'));
         event(new LoanApproved($loan));
+
+        // Invalidate caches immediately after any status update
+        $this->cache->forgetLoanStatus((string) $loan->id);
 
         return back()->with('success', 'Loan approved');
     }
@@ -44,6 +52,9 @@ class LoanApprovalController extends Controller
         event(new LoanStatusUpdated($loan, $oldStatus, 'REJECTED'));
         event(new LoanRejected($loan));
 
+        // Invalidate caches immediately after any status update
+        $this->cache->forgetLoanStatus((string) $loan->id);
+
         return back()->with('success', 'Loan rejected');
     }
 
@@ -54,6 +65,9 @@ class LoanApprovalController extends Controller
         $loan->update([
             'status' => 'ON_HOLD',
         ]);
+
+        // Invalidate caches immediately after any status update
+        $this->cache->forgetLoanStatus((string) $loan->id);
 
         return back()->with('success', 'Loan placed on hold');
     }

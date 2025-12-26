@@ -9,10 +9,16 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\RateLimited;
 
 class LoanSubmittedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    /**
+     * @var int
+     */
+    public $tries = 1;
 
     public function __construct(public LoanApplication $loan)
     {
@@ -23,6 +29,19 @@ class LoanSubmittedMail extends Mailable implements ShouldQueue
         return new Envelope(
             subject: 'We received your loan application',
         );
+    }
+
+    /**
+     * Queue middleware for safe throttling (e.g., Mailtrap free-tier).
+     *
+     * @return array<int, object>
+     */
+    public function middleware(): array
+    {
+        return [
+            // Serialize outbound mail to avoid provider "emails per second" throttles.
+            (new RateLimited('mail')),
+        ];
     }
 
     public function content(): Content

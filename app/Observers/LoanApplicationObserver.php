@@ -5,9 +5,14 @@ namespace App\Observers;
 use App\Models\AuditLog;
 use App\Models\LoanApplication;
 use App\Models\LoanStatusHistory;
+use App\Services\LoanCacheService;
 
 class LoanApplicationObserver
 {
+    public function __construct(private readonly LoanCacheService $cache)
+    {
+    }
+
     public function created(LoanApplication $loan): void
     {
         // Timeline entry
@@ -40,6 +45,8 @@ class LoanApplicationObserver
     public function updated(LoanApplication $loan): void
     {
         if ($loan->wasChanged('status')) {
+            $this->cache->forgetLoanStatus((string) $loan->id);
+
             LoanStatusHistory::create([
                 'loan_application_id' => $loan->id,
                 'previous_status' => $loan->getOriginal('status'),

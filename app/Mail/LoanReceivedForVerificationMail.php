@@ -9,10 +9,20 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\RateLimited;
 
 class LoanReceivedForVerificationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    public $tries = 1;
+
+    public function middleware(): array
+    {
+        return [
+            (new RateLimited('mail')),
+        ];
+    }
 
     /**
      * Create a new message instance.

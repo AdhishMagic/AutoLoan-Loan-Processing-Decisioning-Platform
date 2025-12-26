@@ -7,6 +7,7 @@ use App\Http\Requests\StoreLoanRequest;
 use App\Http\Resources\LoanResource;
 use App\Models\LoanApplication;
 use App\Models\LoanDocument;
+use App\Services\LoanCacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,10 @@ use Illuminate\Support\Str;
 
 class LoanController extends Controller
 {
+    public function __construct(private readonly LoanCacheService $cache)
+    {
+    }
+
     /**
      * Submit a new loan application.
      */
@@ -61,6 +66,46 @@ class LoanController extends Controller
     {
         Gate::authorize('view', $loan);
         return new LoanResource($loan);
+    }
+
+    /**
+     * Fetch loan status (cached).
+     */
+    public function status(Request $request, LoanApplication $loan)
+    {
+        Gate::authorize('view', $loan);
+
+        $status = $this->cache->getLoanStatus((string) $loan->id, function () use ($loan) {
+            return (string) $loan->status;
+        });
+
+        return response()->json([
+            'loan_id' => (string) $loan->id,
+            'status' => $status,
+        ]);
+    }
+
+    /**
+     * Fetch KYC lookup result (cached).
+     */
+    public function kyc(Request $request, LoanApplication $loan)
+    {
+        Gate::authorize('view', $loan);
+
+        $result = $this->cache->getKycResult((string) $loan->id, function () use ($loan) {
+            $applicant = $loan->primaryApplicant()
+                ->select(['loan_application_id', 'kyc_status', 'kyc_reference_number', 'kyc_verified_at'])
+                ->first();
+
+            return [
+                'loan_id' => (string) $loan->id,
+                'kyc_status' => $applicant?->kyc_status,
+                'kyc_reference_number' => $applicant?->kyc_reference_number,
+                'kyc_verified_at' => optional($applicant?->kyc_verified_at)->toISOString(),
+            ];
+        });
+
+        return response()->json($result);
     }
 
     /**
