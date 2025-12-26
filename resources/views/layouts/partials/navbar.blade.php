@@ -9,6 +9,7 @@
 
       <!-- Center: Main navigation -->
       <div class="hidden md:flex items-center gap-2">
+        <a href="{{ route('api-docs') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">API Docs</a>
         @auth
           <a href="{{ route('dashboard') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
           @if (Auth::user()->isLoanOfficer() || Auth::user()->isAdmin())
@@ -29,6 +30,7 @@
 
       <!-- Mobile: simple inline nav -->
       <div class="md:hidden flex items-center">
+        <a href="{{ route('api-docs') }}" class="rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">API Docs</a>
         @auth
           <a href="{{ route('dashboard') }}" class="rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Home</a>
           @if (Auth::user()->isLoanOfficer() || Auth::user()->isAdmin())

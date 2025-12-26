@@ -1,22 +1,424 @@
 {
   "info": {
-    "name": "AutoLoan",
+    "name": "AutoLoan API – Partner Integration",
+    "description": "Partner/integration collection for AutoLoan APIs.\n\nAuth:\n- Use Bearer token in `Authorization: Bearer {{API_KEY}}`\n- Base URL variable includes `/api` (e.g., http://localhost:8000/api)\n\nNotes:\n- Protected endpoints require a valid Sanctum API token and OTP verification (if enabled).\n- API is rate-limited (throttle:api) and returns 429 on limit exceeded.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Health",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/health",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "health"]
+      "name": "Authentication",
+      "description": "Get an API key (Sanctum token) for subsequent requests.",
+      "item": [
+        {
+          "name": "Login (Get API Key)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{EMAIL}}\",\n  \"password\": \"{{PASSWORD}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/login",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Authenticates a user and returns an API key/token.\n\nExpected response example:\n{\n  \"api_key\": \"3|...\"\n}\n\nThis request stores the API key in collection variable `API_KEY`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200/201', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "let json = {};",
+                  "try { json = pm.response.json(); } catch (e) { json = {}; }",
+                  "const apiKey = json.api_key || json.token || json.access_token || json.plainTextToken;",
+                  "pm.test('API key exists in response', function () {",
+                  "  pm.expect(apiKey, 'api_key/token/access_token not found').to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (apiKey) {",
+                  "  pm.collectionVariables.set('API_KEY', apiKey);",
+                  "}"
+                ]
+              }
+            }
+          ]
         }
-      }
+      ]
+    },
+    {
+      "name": "Loan Applications",
+      "description": "Create and fetch loan applications.",
+      "item": [
+        {
+          "name": "Create Loan Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{API_KEY}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loan_product_type\": \"AUTO_LOAN\",\n  \"requested_amount\": 250000,\n  \"requested_tenure_months\": 36,\n  \"income\": 45000,\n  \"employment_type\": \"SALARIED\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/loans",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "loans"
+              ]
+            },
+            "description": "Creates a new loan application. Stores returned `id` into collection variable `loan_id`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "let json = {};",
+                  "try { json = pm.response.json(); } catch (e) { json = {}; }",
+                  "pm.test('Loan id exists', function () {",
+                  "  pm.expect(json.id, 'id missing').to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (json && json.id) {",
+                  "  pm.collectionVariables.set('loan_id', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Loan Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{API_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/loans/{{loan_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}"
+              ]
+            },
+            "description": "Fetches loan details/status for the loan stored in `loan_id`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "let json = {};",
+                  "try { json = pm.response.json(); } catch (e) { json = {}; }",
+                  "pm.test('Loan response has required fields', function () {",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json).to.have.property('application_number');",
+                  "  pm.expect(json).to.have.property('status');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "description": "Download loan documents securely.",
+      "item": [
+        {
+          "name": "Download Loan Document",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{API_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/loans/{{loan_id}}/documents/{{filename}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}",
+                "documents",
+                "{{filename}}"
+              ]
+            },
+            "description": "Downloads a loan document by filename. Set collection variable `filename` to the document's original name."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 404', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Samples",
+      "description": "Examples of common error scenarios: unauthenticated, OTP-required, rate-limited.",
+      "item": [
+        {
+          "name": "Unauthenticated (Missing API Key)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/loans/{{loan_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}"
+              ]
+            },
+            "description": "Expected: 401 Unauthenticated when Authorization header is missing."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () {",
+                  "  pm.expect(pm.response.code).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "401 Example",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Unauthenticated.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "OTP Required (Forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{API_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/loans/{{loan_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}"
+              ]
+            },
+            "description": "Expected: 403 if API OTP verification is required and not completed."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 403', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "403 Example",
+              "originalRequest": {},
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"OTP verification required. Please verify your email OTP to access the API.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rate Limited (429)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{API_KEY}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/loans/{{loan_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}"
+              ]
+            },
+            "description": "Expected: 429 when exceeding 60 requests/minute per token. (Run repeatedly to trigger.)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200/429', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 429]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "429 Example",
+              "originalRequest": {},
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Too Many Attempts.\"\n}"
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "http://127.0.0.1:8000" }
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "API_KEY",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "filename",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "EMAIL",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "PASSWORD",
+      "value": "",
+      "type": "string"
+    }
   ]
 }

@@ -41,4 +41,9 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL').'/auth/google/callback'),
     ],
 
+    'postman' => [
+        // Public Postman Documenter URL (read-only), e.g. https://documenter.getpostman.com/view/XXXXX/AutoLoan-API
+        'docs_url' => env('POSTMAN_DOCS_URL', ''),
+    ],
+
 ];

@@ -17,6 +17,25 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/api-docs', function () {
+    $postmanDocsUrl = (string) config('services.postman.docs_url', '');
+
+    return view('api-docs', [
+        'postmanDocsUrl' => $postmanDocsUrl,
+    ]);
+})->name('api-docs');
+
+Route::get('/api-docs/openapi.yaml', function () {
+    $path = base_path('docs/openapi.yaml');
+
+    abort_unless(is_file($path), 404);
+
+    return response()->file($path, [
+        'Content-Type' => 'application/yaml; charset=UTF-8',
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+    ]);
+})->name('api-docs.openapi');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

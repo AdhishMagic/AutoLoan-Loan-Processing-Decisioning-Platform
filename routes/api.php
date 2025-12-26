@@ -12,6 +12,7 @@ Route::get('/health', function (Request $request) {
 
 // Token-based API auth (mobile/partner use-case)
 Route::post('/token', [AuthTokenController::class, 'store']);
+Route::post('/login', [AuthTokenController::class, 'store']);
 Route::delete('/token', [AuthTokenController::class, 'destroy'])->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'api.otp', 'throttle:api'])->group(function () {
