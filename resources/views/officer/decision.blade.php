@@ -13,6 +13,34 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 sm:rounded-lg p-4">
+                <div class="text-sm">
+                    <span class="font-semibold">Final decision is manual.</span>
+                    The system suggests <span class="font-semibold">{{ $result->decision }}</span> based on rules and score. Please review the reasons and choose Approve, Reject, or Hold.
+                </div>
+                @if(!empty($result->reasons))
+                    @php
+                        $topReasons = array_slice((array)($result->reasons ?? []), 0, 3);
+                    @endphp
+                    @if(!empty($topReasons))
+                        <div class="mt-2">
+                            <div class="text-sm font-medium">Top reasons</div>
+                            <ul class="list-disc ml-5 text-sm space-y-1">
+                                @foreach($topReasons as $r)
+                                    <li>
+                                        @if(is_array($r))
+                                            {{ $r['message'] ?? $r['reason'] ?? $r['rule'] ?? $r['code'] ?? \Illuminate\Support\Str::limit(json_encode($r, JSON_UNESCAPED_SLASHES), 120) }}
+                                        @else
+                                            {{ $r }}
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <div class="mt-1 text-xs text-yellow-700">See full details under "Reasons" below.</div>
+                        </div>
+                    @endif
+                @endif
+            </div>
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
