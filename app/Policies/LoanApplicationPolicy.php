@@ -35,7 +35,7 @@ class LoanApplicationPolicy
         // Align with controller which sets 'approved' and related statuses.
         // Allow approval when loan is submitted or under review (case-insensitive checks).
         $status = strtoupper((string) $loan->status);
-        return $user->isLoanOfficer() && in_array($status, ['SUBMITTED', 'UNDER_REVIEW', 'PENDING_APPROVAL'], true);
+        return $user->isLoanOfficer() && in_array($status, ['SUBMITTED', 'UNDER_REVIEW', 'PENDING_APPROVAL', 'ON_HOLD'], true);
     }
 
     public function reject(User $user, LoanApplication $loan): bool

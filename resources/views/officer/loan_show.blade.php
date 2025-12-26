@@ -4,7 +4,10 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Loan Application Details
             </h2>
-            <a href="{{ route('officer.review') }}" class="text-sm text-indigo-600 hover:text-indigo-900">Back to Review</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('officer.review') }}" class="text-sm text-indigo-600 hover:text-indigo-900">Back to Review</a>
+                <a target="_blank" href="{{ route('officer.loans.decision', $loan) }}" class="text-sm text-indigo-600 hover:text-indigo-900">Underwriting Decision</a>
+            </div>
         </div>
     </x-slot>
 

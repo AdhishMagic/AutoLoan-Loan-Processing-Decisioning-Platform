@@ -80,9 +80,11 @@ class ProcessLoanApplication implements ShouldQueue
         ]);
 
         // 6️⃣ Update status based on automated outcome
+        // IMPORTANT: Do NOT auto-reject. Always route to officer review.
         $nextStatus = match ($result->decision) {
             'APPROVE' => 'PENDING_APPROVAL',
-            'REJECT' => 'REJECTED',
+            // Previously set to REJECTED; now keep for manual review.
+            'REJECT' => 'UNDER_REVIEW',
             default => 'UNDER_REVIEW',
         };
 

@@ -9,7 +9,13 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        $name = $request->user()?->role?->name;
+        $user = $request->user();
+        // Admin is allowed to access any role-protected route.
+        if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
+            return $next($request);
+        }
+
+        $name = $user?->role?->name;
         if (! in_array($name, $roles, true)) {
             abort(403);
         }

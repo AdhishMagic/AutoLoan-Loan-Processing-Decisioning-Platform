@@ -20,10 +20,15 @@ class NotifyUnderwriters implements ShouldQueue
         $officers = User::query()
             ->whereHas('role', fn ($q) => $q->where('name', 'manager'))
             ->whereNotNull('email')
-            ->get(['id', 'email']);
+            ->pluck('email')
+            ->all();
 
-        foreach ($officers as $officer) {
-            Mail::to($officer->email)->queue(new LoanReceivedForVerificationMail($loan));
+        if (!empty($officers)) {
+            $primary = array_shift($officers);
+            // Send one email with BCC to all underwriters, and delay slightly to avoid Mailtrap per-second cap.
+            Mail::to($primary)
+                ->bcc($officers)
+                ->later(now()->addSeconds(2), (new LoanReceivedForVerificationMail($loan))->onConnection('database'));
         }
     }
 }

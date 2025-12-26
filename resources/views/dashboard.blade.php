@@ -48,11 +48,12 @@
             <div class="mb-6 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="text-lg font-semibold text-gray-900">{{ $isAdmin ? 'Overview' : 'Your Applications' }}</h2>
                 <div class="flex gap-2">
-                    @if($isUser)
+                    @if($isUser || $isAdmin)
                         <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500">New Application</a>
                     @endif
                     @if($isAdmin)
                         <a href="{{ route('admin.users.index') }}" class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Manage Users</a>
+                        <a href="{{ route('admin.loans.index') }}" class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">All Applications</a>
                     @endif
                 </div>
             </div>
@@ -107,7 +108,7 @@
                                         @elseif($isOfficer)
                                             <a href="{{ route('officer.loans.show', $app) }}" class="text-indigo-600 hover:underline">Open</a>
                                         @else
-                                            <a href="#" class="text-indigo-600 hover:underline">Open</a>
+                                            <a href="{{ route('admin.loans.show', $app) }}" class="text-indigo-600 hover:underline">Open</a>
                                         @endif
                                     </td>
                                 </tr>
@@ -121,5 +122,42 @@
                 </div>
             </div>
         </div>
+        @if($isAdmin)
+            <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 mt-6">
+                <div class="rounded-lg border bg-white shadow-sm">
+                    <div class="px-4 py-3 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                        <p class="text-sm text-gray-500">Latest audit logs across the system</p>
+                    </div>
+                    @php($logs = \App\Models\AuditLog::query()->with('user')->latest()->limit(10)->get())
+                    <div class="relative overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                <tr>
+                                    <th class="px-4 py-3">When</th>
+                                    <th class="px-4 py-3">User</th>
+                                    <th class="px-4 py-3">Action</th>
+                                    <th class="px-4 py-3">IP</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y bg-white">
+                                @forelse($logs as $log)
+                                    <tr>
+                                        <td class="px-4 py-3 text-gray-500">{{ $log->created_at?->diffForHumans() }}</td>
+                                        <td class="px-4 py-3">{{ $log->user?->email ?? 'System' }}</td>
+                                        <td class="px-4 py-3">{{ $log->action }}</td>
+                                        <td class="px-4 py-3 text-gray-500">{{ $log->ip_address ?? '—' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-6 text-center text-gray-500">No activity yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </x-app-layout>

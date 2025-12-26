@@ -51,4 +51,20 @@ class OfficerController extends Controller
 
         return view('officer.loan_show', compact('loan', 'primaryApplicant', 'documents'));
     }
+
+    public function decision(LoanApplication $loan): View
+    {
+        $this->authorize('view', $loan);
+
+        $activeRule = \App\Models\UnderwritingRule::query()->where('active', true)->first();
+
+        $facts = (new \App\Services\Underwriting\UnderwritingFactsBuilder())->build($loan);
+        $result = (new \App\Services\Underwriting\UnderwritingEngine())->evaluate(
+            (array) ($activeRule?->rules_json ?? []),
+            $facts,
+            $activeRule,
+        );
+
+        return view('officer.decision', compact('loan', 'activeRule', 'facts', 'result'));
+    }
 }

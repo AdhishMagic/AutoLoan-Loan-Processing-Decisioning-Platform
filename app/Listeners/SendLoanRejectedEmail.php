@@ -36,6 +36,10 @@ class SendLoanRejectedEmail implements ShouldQueue
             return;
         }
 
-        Mail::to($emails)->queue(new LoanRejectedMail($loan));
+        $primary = array_shift($emails);
+        $delay = (int) env('MAIL_THROTTLE_SECONDS', 2);
+        Mail::to($primary)
+            ->bcc($emails)
+            ->later(now()->addSeconds($delay), (new LoanRejectedMail($loan))->onConnection('database'));
     }
 }

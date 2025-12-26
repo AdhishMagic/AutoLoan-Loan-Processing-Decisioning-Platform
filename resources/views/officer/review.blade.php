@@ -39,6 +39,9 @@
                                             <a href="{{ route('officer.loans.show', $loan) }}" class="inline-flex items-center rounded-md bg-gray-200 px-3 py-2 text-gray-800 hover:bg-gray-300">
                                                 View
                                             </a>
+                                            <a target="_blank" href="{{ route('officer.loans.decision', $loan) }}" class="inline-flex items-center rounded-md bg-blue-100 text-blue-800 px-3 py-2 hover:bg-blue-200">
+                                                Decision
+                                             </a>
                                             <form method="POST" action="{{ route('loans.approve', $loan) }}">
                                                 @csrf
                                                 <x-primary-button type="submit">Approve</x-primary-button>

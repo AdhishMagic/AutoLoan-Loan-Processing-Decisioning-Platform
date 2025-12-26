@@ -44,6 +44,11 @@ class SendLoanSubmittedEmail implements ShouldQueue
             return;
         }
 
-        Mail::to($emails)->queue(new LoanSubmittedMail($loan));
+        // Send one email with BCC to avoid queuing multiple jobs per recipient.
+        $primary = array_shift($emails);
+        $delay = (int) env('MAIL_THROTTLE_SECONDS', 2);
+        Mail::to($primary)
+            ->bcc($emails)
+            ->later(now()->addSeconds($delay), (new LoanSubmittedMail($loan))->onConnection('database'));
     }
 }

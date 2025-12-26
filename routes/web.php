@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:manager')->group(function () {
         Route::get('officer/review', [OfficerController::class, 'index'])->name('officer.review');
         Route::get('officer/loans/{loan}', [OfficerController::class, 'show'])->name('officer.loans.show');
+        Route::get('officer/loans/{loan}/decision', [OfficerController::class, 'decision'])->name('officer.loans.decision');
         Route::post('loans/{loan}/approve', [LoanApprovalController::class, 'approve'])->name('loans.approve');
         Route::post('loans/{loan}/reject', [LoanApprovalController::class, 'reject'])->name('loans.reject');
         Route::post('loans/{loan}/hold', [LoanApprovalController::class, 'hold'])->name('loans.hold');
@@ -59,6 +60,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('admin/users', AdminUserController::class)->names('admin.users');
         Route::resource('admin/roles', RoleController::class)->names('admin.roles');
+
+        // Admin loans overview
+        Route::get('admin/loans', [\App\Http\Controllers\Web\AdminLoanController::class, 'index'])->name('admin.loans.index');
+        Route::get('admin/loans/{loan}', [\App\Http\Controllers\Web\AdminLoanController::class, 'show'])->name('admin.loans.show');
 
         // Underwriting rule management (admin)
         Route::get('admin/underwriting/rules', [UnderwritingRuleController::class, 'index'])->name('underwriting.rules.index');

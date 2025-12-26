@@ -18,6 +18,11 @@ class AuthServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Allow admin to perform any ability without explicit policy checks
+        Gate::before(function ($user, string $ability = null) {
+            return method_exists($user, 'isAdmin') && $user->isAdmin() ? true : null;
+        });
+
         Gate::define('use-analyzer', function ($user): bool {
             return $user->isLoanOfficer() || $user->isAdmin();
         });
