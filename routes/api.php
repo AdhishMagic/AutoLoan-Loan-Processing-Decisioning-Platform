@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthTokenController;
+use App\Http\Controllers\Api\LoanController;
 use App\Models\LoanApplication;
 
 Route::get('/health', function (Request $request) {
@@ -45,4 +46,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return response()->json($query->latest()->limit(20)->get());
     });
+
+    // Production-ready endpoints
+    Route::post('/loans', [LoanController::class, 'store']);
+    Route::get('/loans/{loan}', [LoanController::class, 'show']);
+    Route::get('/loans/{loan}/documents/{filename}', [LoanController::class, 'downloadDocument'])
+        ->where('filename', '.*');
 });
