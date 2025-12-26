@@ -128,6 +128,10 @@ class LoanApplication extends Model
         'is_fast_track' => 'boolean',
         'is_top_up_loan' => 'boolean',
         'is_saved' => 'boolean',
+        'pan_number' => 'encrypted',
+        'aadhaar_number' => 'encrypted',
+        'bank_account_number' => 'encrypted',
+        'personal_address' => 'encrypted',
     ];
 
     // Relationships to Users

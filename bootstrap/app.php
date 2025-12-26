@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'api.otp' => \App\Http\Middleware\EnsureApiOtpVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

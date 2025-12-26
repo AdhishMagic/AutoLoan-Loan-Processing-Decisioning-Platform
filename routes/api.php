@@ -14,7 +14,7 @@ Route::get('/health', function (Request $request) {
 Route::post('/token', [AuthTokenController::class, 'store']);
 Route::delete('/token', [AuthTokenController::class, 'destroy'])->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'api.otp', 'throttle:api'])->group(function () {
     Route::get('/me', function (Request $request) {
         $user = $request->user();
 

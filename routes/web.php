@@ -94,6 +94,15 @@ Route::middleware('auth')->group(function () {
         ->name('loan.document.download');
 
     Route::get('notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
+
+    // API Key Management (Sanctum Personal Access Tokens)
+    Route::get('/dashboard/api-keys', [\App\Http\Controllers\ApiKeyController::class, 'index'])->name('api-keys.index');
+    Route::post('/dashboard/api-keys', [\App\Http\Controllers\ApiKeyController::class, 'store'])->name('api-keys.store');
+    Route::delete('/dashboard/api-keys/{token}', [\App\Http\Controllers\ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
+
+    // OTP actions for API access verification
+    Route::post('/dashboard/api-keys/otp/send', [\App\Http\Controllers\Web\ApiOtpController::class, 'send'])->name('api-keys.otp.send');
+    Route::post('/dashboard/api-keys/otp/verify', [\App\Http\Controllers\Web\ApiOtpController::class, 'verify'])->name('api-keys.otp.verify');
 });
 
 require __DIR__.'/auth.php';

@@ -108,6 +108,7 @@
           </div>
           <ul class="py-2 text-sm" aria-labelledby="profileMenuButton">
             <li><a href="{{ route('profile.edit') }}" class="block px-4 py-2 hover:bg-gray-100">Profile</a></li>
+            <li><a href="{{ route('api-keys.index') }}" class="block px-4 py-2 hover:bg-gray-100">API Keys</a></li>
             <li>
               <form method="POST" action="{{ route('logout') }}">
                 @csrf
