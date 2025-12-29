@@ -47,13 +47,13 @@
 
             <div class="mb-6 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="text-lg font-semibold text-gray-900">{{ $isAdmin ? 'Overview' : 'Your Applications' }}</h2>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     @if($isUser || $isAdmin)
-                        <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500">New Application</a>
+                        <a href="{{ route('loans.create') }}" class="inline-flex w-full sm:w-auto items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500">New Application</a>
                     @endif
                     @if($isAdmin)
-                        <a href="{{ route('admin.users.index') }}" class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Manage Users</a>
-                        <a href="{{ route('admin.loans.index') }}" class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">All Applications</a>
+                        <a href="{{ route('admin.users.index') }}" class="inline-flex w-full sm:w-auto items-center justify-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Manage Users</a>
+                        <a href="{{ route('admin.loans.index') }}" class="inline-flex w-full sm:w-auto items-center justify-center rounded-md border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">All Applications</a>
                     @endif
                 </div>
             </div>

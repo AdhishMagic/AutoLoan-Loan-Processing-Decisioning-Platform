@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'api.otp' => \App\Http\Middleware\EnsureApiOtpVerified::class,
         ]);
+
+        // Prevent Boost from injecting browser logger
+        $middleware->remove(\Laravel\Boost\Middleware\InjectBoost::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

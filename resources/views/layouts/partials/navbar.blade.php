@@ -104,7 +104,15 @@
         </div>
 
         <button id="profileMenuButton" data-dropdown-toggle="profileMenu" data-dropdown-placement="bottom-end" class="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100">
-          <img src="https://api.dicebear.com/9.x/initials/svg?seed={{ urlencode(Auth::user()->name ?? 'U') }}" alt="avatar" class="h-8 w-8 rounded-full" />
+          @php
+            $name = (string) (Auth::user()->name ?? 'User');
+            $parts = preg_split('/\s+/', trim($name)) ?: [];
+            $initials = strtoupper(substr((string) ($parts[0] ?? 'U'), 0, 1).substr((string) ($parts[1] ?? ''), 0, 1));
+            $initials = $initials !== '' ? $initials : 'U';
+          @endphp
+          <div class="h-8 w-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-semibold">
+            {{ $initials }}
+          </div>
           <span class="hidden md:inline text-sm font-medium">{{ Auth::user()->name }}</span>
           <svg class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
         </button>

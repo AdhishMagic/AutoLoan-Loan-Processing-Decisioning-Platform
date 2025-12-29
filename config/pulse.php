@@ -122,7 +122,6 @@ return [
 
     'middleware' => [
         'web',
-        'auth',
         Authorize::class,
     ],
 
@@ -145,9 +144,6 @@ return [
                 ...Pulse::defaultVendorCacheKeys(),
             ],
             'groups' => [
-                '/^loan:status:.*/' => 'loan:status:*',
-                '/^user:profile:.*/' => 'user:profile:*',
-                '/^kyc:result:.*/' => 'kyc:result:*',
                 '/^job-exceptions:.*/' => 'job-exceptions:*',
                 // '/:\d+/' => ':*',
             ],
@@ -201,7 +197,7 @@ return [
         Recorders\SlowQueries::class => [
             'enabled' => env('PULSE_SLOW_QUERIES_ENABLED', true),
             'sample_rate' => env('PULSE_SLOW_QUERIES_SAMPLE_RATE', 1),
-            'threshold' => env('PULSE_SLOW_QUERIES_THRESHOLD', 500),
+            'threshold' => env('PULSE_SLOW_QUERIES_THRESHOLD', 1000),
             'location' => env('PULSE_SLOW_QUERIES_LOCATION', true),
             'max_query_length' => env('PULSE_SLOW_QUERIES_MAX_QUERY_LENGTH'),
             'ignore' => [
@@ -213,7 +209,7 @@ return [
         Recorders\SlowRequests::class => [
             'enabled' => env('PULSE_SLOW_REQUESTS_ENABLED', true),
             'sample_rate' => env('PULSE_SLOW_REQUESTS_SAMPLE_RATE', 1),
-            'threshold' => env('PULSE_SLOW_REQUESTS_THRESHOLD', 500),
+            'threshold' => env('PULSE_SLOW_REQUESTS_THRESHOLD', 1000),
             'ignore' => [
                 '#^/'.env('PULSE_PATH', 'pulse').'$#', // Pulse dashboard...
                 '#^/telescope#', // Telescope dashboard...

@@ -1,3 +1,66 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Laravel Pulse Graph Fixes - Prevent graphs from being cut off */
+@layer utilities {
+    /* Ensure Pulse graphs render at full height without clipping */
+    [wire\:ignore] canvas,
+    [x-ref="canvas"] {
+        height: auto !important;
+        min-height: 120px !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    /* Queue graph containers */
+    [x-data*="queueChart"] {
+        min-height: 140px !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    /* Server graph containers */
+    [x-data*="cpuChart"],
+    [x-data*="memoryChart"] {
+        min-height: 200px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* General Pulse card content areas */
+    .pulse-card,
+    [class*="pulse-"] {
+        overflow: visible !important;
+    }
+    
+    /* Ensure chart wrappers don't clip content */
+    .chart-wrapper,
+    .metric-graph {
+        height: auto !important;
+        min-height: 300px;
+        overflow: visible !important;
+    }
+    
+    /* Fix Pulse card layout and prevent content clipping */
+    [class*="@container"] section,
+    [class*="col-span"] {
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Ensure scroll wrapper has proper height */
+    [class*="@container/scroll-wrapper"] {
+        min-height: 150px;
+        flex: 1;
+    }
+    
+    /* Fix card content visibility */
+    .bg-white.dark\:bg-gray-900,
+    .rounded-xl.shadow-sm {
+        overflow: visible !important;
+    }
+}
