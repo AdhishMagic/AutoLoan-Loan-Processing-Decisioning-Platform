@@ -3,18 +3,20 @@
   <div class="mx-auto w-full max-w-7xl px-3 sm:px-4">
     <div class="flex h-14 sm:h-16 items-center justify-between">
       <!-- Left: App Name -->
-      <div class="flex items-center">
+      <div class="flex items-center shrink-0">
         <a href="{{ route('dashboard') }}" class="text-base font-semibold text-gray-900">Auto Loan</a>
       </div>
 
       <!-- Center: Main navigation -->
-      <div class="hidden md:flex items-center gap-2">
+      <div class="hidden lg:flex flex-1 min-w-0 items-center justify-center">
+        <div class="flex min-w-0 items-center gap-1 xl:gap-2 overflow-x-auto whitespace-nowrap">
         <a href="{{ route('api-docs') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">API Docs</a>
         @auth
           <a href="{{ route('dashboard') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
           @if (Auth::user()->isLoanOfficer() || Auth::user()->isAdmin())
             <a href="{{ route('officer.review') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Officer Review</a>
             @if (Auth::user()->isAdmin())
+              <a href="{{ url('/pulse') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Pulse</a>
               <a href="{{ route('underwriting.rules.index') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">Underwriting Rules</a>
               <a href="{{ route('admin.loans.index') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">All Applications</a>
             @else
@@ -26,15 +28,18 @@
             <a href="{{ route('loans.index') }}" class="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">My Loan Applications</a>
           @endif
         @endauth
+        </div>
       </div>
 
       <!-- Mobile: simple inline nav -->
-      <div class="md:hidden flex items-center">
+      <div class="lg:hidden flex flex-1 min-w-0 items-center">
+        <div class="flex min-w-0 items-center overflow-x-auto whitespace-nowrap">
         <a href="{{ route('api-docs') }}" class="rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">API Docs</a>
         @auth
           <a href="{{ route('dashboard') }}" class="rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Home</a>
           @if (Auth::user()->isLoanOfficer() || Auth::user()->isAdmin())
             @if (Auth::user()->isAdmin())
+              <a href="{{ url('/pulse') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Pulse</a>
               <a href="{{ route('admin.loans.index') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">All Apps</a>
             @endif
             <a href="{{ route('officer.review') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Review</a>
@@ -49,6 +54,7 @@
             <a href="{{ route('loans.create') }}" class="ml-1 rounded-lg px-2 py-1.5 text-sm text-white bg-indigo-600 hover:bg-indigo-700">New App</a>
           @endif
         @endauth
+        </div>
       </div>
 
       <!-- Right: Notifications + Profile -->

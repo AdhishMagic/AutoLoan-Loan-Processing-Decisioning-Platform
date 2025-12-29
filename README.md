@@ -76,3 +76,29 @@ Conceptually, scheduling is where you’d define periodic jobs (cleanup, reminde
 ## Notes
 
 - The repo is intentionally structured so the *logic* is portable: you can swap the underlying implementation details later (e.g., how tokens are issued, queue backend, or where files are stored) without changing the business workflow.
+
+## Observability (Laravel Pulse)
+
+Pulse is the built-in observability layer for AutoLoan and is available at `/pulse`.
+
+**What Pulse monitors**
+- HTTP request performance (including slow requests)
+- Queue and job throughput/runtime (including slow jobs)
+- Exceptions and error rates
+- Slow database queries
+- Cache interactions (hit/miss patterns)
+- Server snapshots (worker / host health via scheduled `pulse:check`)
+
+**Access control**
+- `/pulse` is restricted to authenticated staff users only: `admin` and `loan_officer` (mapped to the `manager` role).
+
+**AutoLoan workflows to watch**
+- Loan processing delays: look at slow requests and job runtimes around loan submission and processing.
+- KYC / Credit failures: check Exceptions + Queues views after dispatching background jobs.
+- Slow admin dashboard queries: review Slow Queries when reviewing applications.
+- Cache behavior for `loan:status:*`, `user:profile:*`, `kyc:result:*`: check Cache Interactions groups.
+
+**Common issues Pulse helps diagnose**
+- A spike in failed jobs when Redis/queue workers are down.
+- Long request times caused by slow DB queries.
+- Cache misses increasing load on loan status / KYC reads.

@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\SupportController;
 use App\Http\Controllers\Web\UnderwritingRuleController;
 use App\Http\Controllers\LoanDocumentController;
 use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -39,6 +40,18 @@ Route::get('/api-docs/openapi.yaml', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Pulse debugging helpers (local only).
+if (app()->environment('local')) {
+    Route::middleware('auth')->get('/internal/pulse/slow-request', function () {
+        abort_unless(Gate::allows('viewPulse'), 403);
+
+        // Default threshold is 500ms; sleep ~700ms.
+        usleep(700_000);
+
+        return response()->json(['ok' => true]);
+    })->name('internal.pulse.slow-request');
+}
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

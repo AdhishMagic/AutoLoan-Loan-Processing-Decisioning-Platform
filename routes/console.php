@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Carbon\CarbonInterval;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -43,3 +44,21 @@ Schedule::call(function () {
         ->where('expires_at', '<', now())
         ->delete();
 })->dailyAt('02:00')->name('prune-expired-api-tokens');
+
+// Pulse: server heartbeat (drives Servers / worker health widgets)
+Schedule::command('pulse:check')->everyMinute()->name('pulse-check');
+
+// Pulse: daily retention trimming (free-tier friendly DB storage)
+Schedule::call(function () {
+    if (! Schema::hasTable('pulse_entries') || ! Schema::hasTable('pulse_values') || ! Schema::hasTable('pulse_aggregates')) {
+        return;
+    }
+
+    $keep = (string) config('pulse.storage.trim.keep', '7 days');
+    $interval = CarbonInterval::make($keep) ?? CarbonInterval::days(7);
+    $cutoff = now()->sub($interval)->getTimestamp();
+
+    DB::table('pulse_entries')->where('timestamp', '<', $cutoff)->delete();
+    DB::table('pulse_values')->where('timestamp', '<', $cutoff)->delete();
+    DB::table('pulse_aggregates')->where('bucket', '<', $cutoff)->delete();
+})->dailyAt('02:30')->name('pulse-trim');
