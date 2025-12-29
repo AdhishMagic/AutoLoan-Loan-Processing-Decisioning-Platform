@@ -304,11 +304,14 @@ class LoanApplicationController extends Controller
                          ->with('success', 'Step saved successfully.');
     }
 
-    public function store(StoreLoanApplicationRequest $request, LoanApplicationService $service): RedirectResponse
+    public function store(\App\Http\Requests\StoreLoanRequest $request, \App\Services\LoanApplicationService $service)
     {
-        $loan = $service->create($request->user(), $request->validated());
-
-        return redirect()->route('loans.show', $loan)->with('success', 'Application created');
+        $dto = \App\DTOs\LoanDto::fromRequest($request);
+        $loan = $service->submit($dto);
+        return response()->json([
+            'success' => true,
+            'loan_id' => $loan->id,
+        ], 201);
     }
 
     public function show(LoanApplication $loan): View|RedirectResponse

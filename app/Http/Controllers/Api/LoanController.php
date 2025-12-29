@@ -5,82 +5,59 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLoanRequest;
 use App\Http\Resources\LoanResource;
-use App\Models\LoanApplication;
-use App\Models\LoanDocument;
 use App\Services\LoanCacheService;
+use App\Services\LoanProcessingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class LoanController extends Controller
 {
-    public function __construct(private readonly LoanCacheService $cache)
-    {
-    }
+    public function __construct(
+        private readonly LoanCacheService $cache,
+        private readonly LoanProcessingService $processing,
+    ) {}
 
     /**
      * Submit a new loan application.
      */
     public function store(StoreLoanRequest $request)
     {
-        $user = $request->user();
+        $dto = \App\DTOs\LoanDto::fromRequest($request);
+        $result = $this->processing->submit($dto);
+        $loan = $this->processing->getLoan($result['loan_id']);
 
-        $validated = $request->validated();
-
-        $applicationNumber = 'LAP-' . Str::upper(Str::random(12));
-
-        $payload = [
-            'user_id' => $user->id,
-            'application_number' => $applicationNumber,
-            'application_date' => now()->toDateString(),
-            'loan_product_type' => $validated['loan_product_type'],
-            'requested_amount' => $validated['requested_amount'],
-            'requested_tenure_months' => $validated['requested_tenure_months'],
-            'monthly_income' => $validated['income'],
-            'status' => 'UNDER_REVIEW',
-            'submitted_at' => now(),
-        ];
-
-        // Optionally persist auxiliary fields safely
-        if (isset($validated['employment_type'])) {
-            $payload['customer_notes'] = trim(($validated['employment_type'] ?? '') !== ''
-                ? '[employment_type] ' . $validated['employment_type']
-                : '');
-        }
-
-        $loan = DB::transaction(function () use ($payload) {
-            return LoanApplication::create($payload);
-        });
-
-        return (new LoanResource($loan))
-            ->response()
-            ->setStatusCode(201);
+        return response()->json([
+            'loan' => new LoanResource($loan),
+            'decision' => $result,
+        ], 201);
     }
 
     /**
      * Fetch loan details for the authenticated user.
      */
-    public function show(Request $request, LoanApplication $loan)
+    public function show(Request $request, string $loan)
     {
-        Gate::authorize('view', $loan);
-        return new LoanResource($loan);
+        $loanModel = $this->processing->getLoan($loan);
+        Gate::authorize('view', $loanModel);
+
+        return new LoanResource($loanModel);
     }
 
     /**
      * Fetch loan status (cached).
      */
-    public function status(Request $request, LoanApplication $loan)
+    public function status(Request $request, string $loan)
     {
-        Gate::authorize('view', $loan);
+        $loanModel = $this->processing->getLoan($loan);
+        Gate::authorize('view', $loanModel);
 
-        $status = $this->cache->getLoanStatus((string) $loan->id, function () use ($loan) {
-            return (string) $loan->status;
+        $status = $this->cache->getLoanStatus((string) $loanModel->id, function () use ($loanModel) {
+            return (string) $loanModel->status;
         });
 
         return response()->json([
-            'loan_id' => (string) $loan->id,
+            'loan_id' => (string) $loanModel->id,
             'status' => $status,
         ]);
     }
@@ -88,21 +65,13 @@ class LoanController extends Controller
     /**
      * Fetch KYC lookup result (cached).
      */
-    public function kyc(Request $request, LoanApplication $loan)
+    public function kyc(Request $request, string $loan)
     {
-        Gate::authorize('view', $loan);
+        $loanModel = $this->processing->getLoan($loan);
+        Gate::authorize('view', $loanModel);
 
-        $result = $this->cache->getKycResult((string) $loan->id, function () use ($loan) {
-            $applicant = $loan->primaryApplicant()
-                ->select(['loan_application_id', 'kyc_status', 'kyc_reference_number', 'kyc_verified_at'])
-                ->first();
-
-            return [
-                'loan_id' => (string) $loan->id,
-                'kyc_status' => $applicant?->kyc_status,
-                'kyc_reference_number' => $applicant?->kyc_reference_number,
-                'kyc_verified_at' => optional($applicant?->kyc_verified_at)->toISOString(),
-            ];
+        $result = $this->cache->getKycResult((string) $loanModel->id, function () use ($loanModel) {
+            return $this->processing->getKycSummary((string) $loanModel->id);
         });
 
         return response()->json($result);
@@ -111,15 +80,12 @@ class LoanController extends Controller
     /**
      * Securely download a loan document owned by the authenticated user.
      */
-    public function downloadDocument(Request $request, LoanApplication $loan, string $filename)
+    public function downloadDocument(Request $request, string $loan, string $filename)
     {
-        Gate::authorize('view', $loan);
+        $loanModel = $this->processing->getLoan($loan);
+        Gate::authorize('view', $loanModel);
 
-        $document = LoanDocument::query()
-            ->where('loan_application_id', $loan->id)
-            ->where('original_name', $filename)
-            ->firstOrFail();
-
+        $document = $this->processing->findDocumentForDownload((string) $loanModel->id, $filename);
         Gate::authorize('view', $document);
 
         $path = $document->file_path;
