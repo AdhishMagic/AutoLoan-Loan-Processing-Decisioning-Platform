@@ -5,8 +5,8 @@
                 Loan Application Details
             </h2>
             <div class="flex items-center gap-3">
-                <a href="{{ route('officer.review') }}" class="text-sm text-indigo-600 hover:text-indigo-900">Back to Review</a>
-                <a target="_blank" href="{{ route('officer.loans.decision', $loan) }}" class="text-sm text-indigo-600 hover:text-indigo-900">Underwriting Decision</a>
+                <a href="{{ route('officer.review') }}" class="text-sm text-gray-700 hover:text-gray-900">Back to Review</a>
+                <a target="_blank" href="{{ route('officer.loans.decision', $loan) }}" class="text-sm text-gray-700 hover:text-gray-900">Underwriting Decision</a>
             </div>
         </div>
     </x-slot>
@@ -245,7 +245,7 @@
                                     <td class="py-2 pr-4">{{ $doc->user?->email ?? '—' }}</td>
                                     <td class="py-2 pr-4">
                                         @can('view', $doc)
-                                            <a class="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700" href="{{ route('loan.document.signed-link', $doc) }}">Download</a>
+                                            <a class="inline-flex items-center rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-gray-800" href="{{ route('loan.document.signed-link', $doc) }}">Download</a>
                                             <a class="ml-2 inline-flex items-center rounded-md bg-gray-200 px-3 py-1.5 text-gray-800 hover:bg-gray-300" target="_blank" href="{{ route('loan.document.signed-link', $doc) }}?json=1">Get link</a>
                                         @else
                                             <span class="text-gray-500">No access</span>

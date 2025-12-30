@@ -8,7 +8,7 @@
                 $isAdmin = auth()->check() && auth()->user()->role?->name === 'admin';
                 $editRoute = $isAdmin ? 'underwriting.rules.edit' : 'officer.underwriting.rules.edit';
             @endphp
-            <a href="{{ route($editRoute, $rule) }}" class="text-sm text-indigo-600 hover:text-indigo-900">Back</a>
+            <a href="{{ route($editRoute, $rule) }}" class="text-sm text-gray-700 hover:text-gray-900">Back</a>
         </div>
     </x-slot>
 

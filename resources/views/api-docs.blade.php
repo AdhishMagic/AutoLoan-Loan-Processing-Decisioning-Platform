@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">API Docs</h2>
-            <a href="{{ route('login') }}" class="text-sm text-indigo-600 hover:text-indigo-900">Dashboard login</a>
+            <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-gray-900">Dashboard login</a>
         </div>
     </x-slot>
 
@@ -77,7 +77,7 @@
                                     href="{{ $postmanDocsUrl }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                    class="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
                                 >
                                     View full API reference
                                 </a>

@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Create Underwriting Rule
             </h2>
-            <a href="{{ route('officer.underwriting.rules.index') }}" class="text-sm text-indigo-600 hover:text-indigo-900">Back</a>
+            <a href="{{ route('officer.underwriting.rules.index') }}" class="text-sm text-gray-700 hover:text-gray-900">Back</a>
         </div>
     </x-slot>
 

@@ -5,7 +5,7 @@
 <div class="mx-auto max-w-7xl">
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-xl font-semibold">My Loan Applications</h1>
-    <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">New Application</a>
+    <a href="{{ route('loans.create') }}" class="inline-flex items-center rounded-md bg-gray-900 px-3 py-2 text-white hover:bg-gray-800">New Application</a>
   </div>
 
   <form method="POST" action="{{ route('loans.bulk-destroy') }}" x-data="{ all:false }" class="bg-white shadow rounded-lg overflow-hidden">
@@ -49,9 +49,9 @@
             <td class="px-4 py-2 text-right text-sm">
               @php($nextStep = (($loan->stage_order ?? 0) + 1))
               @if($loan->isDraft())
-                <a href="{{ route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700">Continue</a>
+                <a href="{{ route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]) }}" class="inline-flex items-center rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-gray-800">Continue</a>
               @else
-                <a href="{{ route('loans.show', $loan) }}" class="text-blue-600 hover:underline">View</a>
+                <a href="{{ route('loans.show', $loan) }}" class="text-gray-700 hover:underline">View</a>
               @endif
             </td>
           </tr>

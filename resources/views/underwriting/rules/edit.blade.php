@@ -10,7 +10,7 @@
                 $updateRoute = $isAdmin ? 'underwriting.rules.update' : 'officer.underwriting.rules.update';
                 $testRoute = $isAdmin ? 'underwriting.rules.test' : 'officer.underwriting.rules.test';
             @endphp
-            <a href="{{ route($indexRoute) }}" class="text-sm text-indigo-600 hover:text-indigo-900">Back</a>
+            <a href="{{ route($indexRoute) }}" class="text-sm text-gray-700 hover:text-gray-900">Back</a>
         </div>
     </x-slot>
 

@@ -14,7 +14,7 @@
                 <div class="text-sm"><span class="text-gray-500">Status:</span> <span class="font-medium">{{ $user->status }}</span></div>
 
                 <div class="pt-4">
-                    <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">Edit</a>
+                    <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">Edit</a>
                     <a href="{{ route('admin.users.index') }}" class="ms-2 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50">Back</a>
                 </div>
             </div>

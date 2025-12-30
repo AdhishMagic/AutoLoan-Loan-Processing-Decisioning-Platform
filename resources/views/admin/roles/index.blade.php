@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="mb-4 flex items-center justify-between">
                     <div class="text-sm text-gray-600">Define and manage user roles.</div>
-                    <a href="{{ route('admin.roles.create') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">New Role</a>
+                    <a href="{{ route('admin.roles.create') }}" class="inline-flex items-center rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">New Role</a>
                 </div>
 
                 <div class="relative overflow-x-auto">
@@ -31,7 +31,7 @@
                                     <td class="px-4 py-3">{{ $role->users()->count() }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
-                                            <a href="{{ route('admin.roles.show', $role) }}" class="text-indigo-600 hover:underline">View</a>
+                                            <a href="{{ route('admin.roles.show', $role) }}" class="text-gray-700 hover:underline">View</a>
                                             <a href="{{ route('admin.roles.edit', $role) }}" class="text-gray-700 hover:underline">Edit</a>
                                         </div>
                                     </td>
