@@ -1,104 +1,269 @@
-# AutoLoan — Loan Processing & Decisioning Platform
+# AutoLoan — Loan Processing & Decisioning Platform (Laravel)
 
-AutoLoan is a role-based loan application and decisioning platform with:
-- An 8-step borrower wizard (draft/save/resume + final submit)
-- Loan officer review workflow (approve/reject/hold)
-- Secure document upload + time-limited downloads
-- Event-driven emails + in-app notifications
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-Framework-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
+  <img src="https://img.shields.io/badge/PHP-8%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP" />
+  <img src="https://img.shields.io/badge/Queue-Workers-0EA5E9?style=for-the-badge" alt="Queues" />
+  <img src="https://img.shields.io/badge/Auth-Sanctum-10B981?style=for-the-badge" alt="Sanctum" />
+  <img src="https://img.shields.io/badge/Rules-Decisioning-F59E0B?style=for-the-badge" alt="Decisioning" />
+</p>
 
-## Process Coverage (Concept + Logic)
+<p align="center">
+  <b>AutoLoan</b> is a production-minded <b>Laravel-based loan management platform</b> that automates the complete loan lifecycle—digital applications, document verification, and <b>rule-based approval decisioning</b>—using secure APIs, background job processing, and clean architecture to showcase real-world fintech workflows.
+</p>
 
-This section maps the key platform “processes” (conceptually) to where the logic currently lives in the codebase.
+---
 
-### 1) Authentication (SSO + login)
+## ✨ Highlights (What makes this “fintech-grade”)
 
-**Status:** Implemented (web login + Google SSO)
+- **End-to-end loan lifecycle**: application → document upload → checks → underwriting decision → notifications
+- **Rule-based decisioning engine**: JSON rules stored in DB + auditable decision trace
+- **Async processing**: queues/jobs for OCR/KYC/credit checks and PDF/email generation
+- **Secure APIs**: Sanctum token auth, rate limiting, signed URLs, validation & resources
+- **Clean architecture**: controllers stay thin, business logic in services, repositories, DTOs
+- **Audit-friendly**: events log / audit trail mindset for compliance-like workflows
 
-- Session-based auth flows (register/login/email-verify) are defined in [routes/auth.php](routes/auth.php)
-- Google OAuth SSO flow is implemented in [app/Http/Controllers/Auth/GoogleAuthController.php](app/Http/Controllers/Auth/GoogleAuthController.php) and wired in [routes/web.php](routes/web.php)
+---
 
-**Token-based API auth:** Not currently wired for API routes (current API is just a health endpoint in [routes/api.php](routes/api.php)).
+## 🧭 Feature-by-Feature Map (AutoLoan Architecture)
 
-### 2) Authorization (roles + policies/gates)
+> This map is designed as a portfolio checklist. Each module is a “senior” Laravel feature with a clear AutoLoan use-case.
 
-**Status:** Implemented
+### 🔐 Authentication & Authorization
+- **Socialite + Sanctum** for web + API auth
+- **Policies/Gates + Roles** for underwriting/admin/borrower access control  
+**Example rules:**
+- Borrower can only view their loans
+- Underwriter can approve/reject
+- Admin can see all dashboards
 
-- Role middleware enforcement via [app/Http/Middleware/RoleMiddleware.php](app/Http/Middleware/RoleMiddleware.php) and role-based route groups in [routes/web.php](routes/web.php)
-- Loan application authorization rules via [app/Policies/LoanApplicationPolicy.php](app/Policies/LoanApplicationPolicy.php) and registration in [app/Providers/AuthServiceProvider.php](app/Providers/AuthServiceProvider.php)
-- Document authorization rules via [app/Http/Policies/LoanDocumentPolicy.php](app/Http/Policies/LoanDocumentPolicy.php)
-- Policy enforcement is used via `Gate::authorize(...)` and `$this->authorize(...)` in controllers
+---
 
-### 3) Queues, Jobs & Background processing
+### ⚙️ Queues, Workers & Scheduling
+- **Jobs**: OCR parsing, KYC checks, credit checks, PDF creation, email notifications
+- **Scheduler**: nightly reconciliation, retries, cleanup, summaries
+- **Horizon** (optional) to monitor job health & throughput
 
-**Status:** Implemented (asynchronous pattern)
+---
 
-- Background processing job: [app/Jobs/ProcessLoanApplication.php](app/Jobs/ProcessLoanApplication.php)
-- Dispatched on final submit (step 8) in [app/Http/Controllers/Web/LoanApplicationController.php](app/Http/Controllers/Web/LoanApplicationController.php)
-- Emails are queued (non-blocking) via `->queue(...)` in listeners under [app/Listeners](app/Listeners)
+### 🔔 Events, Broadcasting & Notifications
+- **Events/Listeners** to decouple business flows
+- **Real-time updates** (Echo/WebSockets) for loan progress
+- **Notifications** via mail + database for a user-visible history
 
-### 4) Scheduling (periodic tasks)
+---
 
-**Status:** Not implemented yet (no app-level scheduled tasks defined)
+### 📁 Document Storage & Signed URLs
+- Store borrower docs safely
+- Use **temporary signed routes** to allow secure time-limited downloads  
+Example:
+- “Offer Letter” download link valid for 30 minutes
 
-Conceptually, scheduling is where you’d define periodic jobs (cleanup, reminders, reconciliation). The project currently relies on event-driven and on-demand processing rather than time-based scheduling.
+---
 
-### 5) Events & Listeners (decoupled workflow)
+### 🧠 Underwriting Rule Engine (Decisioning)
+- Underwriting rules stored as **JSON**
+- Executor evaluates inputs like:
+  - credit score
+  - income
+  - DTI ratio
+  - employment type
+- Produces: `approved` / `rejected` / `manual_review`
+- Saves a **decision trace** for auditability
 
-**Status:** Implemented (event-driven architecture)
+---
 
-- Domain events: [app/Events](app/Events)
-- Listener wiring: [app/Providers/EventServiceProvider.php](app/Providers/EventServiceProvider.php)
-- On submit: emits `LoanApplicationSubmitted` + `LoanSubmitted`
-- On decisions: emits `LoanApproved` / `LoanRejected` and `LoanStatusUpdated`
+### 🧰 Testing + CI/CD
+- Feature tests for API endpoints & auth
+- Unit tests for underwriting engine and services
+- GitHub Actions pipeline for tests & quality checks (free-tier friendly)
 
-**Broadcasting / realtime push:** Not implemented (events are currently internal and handled by listeners, not broadcast to clients).
+---
 
-### 6) Notifications & Mail (user-facing comms)
+## 🏗️ Suggested Folder Structure (Clean & Maintainable)
 
-**Status:** Implemented
+```txt
+app/
+  DTOs/
+    LoanDto.php
+  Events/
+    LoanStatusUpdated.php
+  Exceptions/
+  Http/
+    Controllers/
+      Api/
+        LoanController.php
+      Auth/
+        SocialController.php
+    Requests/
+      StoreLoanRequest.php
+    Resources/
+      LoanResource.php
+  Jobs/
+    ProcessLoanApplication.php
+  Listeners/
+    NotifyUnderwriters.php
+  Models/
+    Loan.php
+    LoanDocument.php
+  Observers/
+    LoanObserver.php
+  Policies/
+    LoanPolicy.php
+  Repositories/
+    LoanRepository.php
+  Services/
+    UnderwritingEngine.php
+    OcrService.php
+    OtpService.php
+    LoanCacheService.php
 
-- Database in-app notifications via [app/Notifications/LoanStatusNotification.php](app/Notifications/LoanStatusNotification.php)
-- Notifications are created for both applicant and officer via listeners:
-	- [app/Listeners/SendLoanSubmittedNotification.php](app/Listeners/SendLoanSubmittedNotification.php)
-	- [app/Listeners/SendLoanApprovedNotification.php](app/Listeners/SendLoanApprovedNotification.php)
-	- [app/Listeners/SendLoanRejectedNotification.php](app/Listeners/SendLoanRejectedNotification.php)
-- Navbar bell displays unread count + recent notifications in [resources/views/layouts/partials/navbar.blade.php](resources/views/layouts/partials/navbar.blade.php)
-- Clicking a notification marks it read and redirects via [app/Http/Controllers/NotificationController.php](app/Http/Controllers/NotificationController.php) and [routes/web.php](routes/web.php)
+database/
+  migrations/
 
-### 7) Storage & Signed URLs (secure documents)
+routes/
+  web.php
+  api.php
+```
 
-**Status:** Implemented
+---
 
-- Private document storage uses local disk + per-loan folders and is enforced in [app/Http/Controllers/LoanDocumentController.php](app/Http/Controllers/LoanDocumentController.php)
-- Time-limited downloads use signed routes (temporary signed links + signature validation)
-- Upload is integrated into wizard step 8 (pre-submit) in [resources/views/loans/step_8.blade.php](resources/views/loans/step_8.blade.php)
+## 🚀 Quick Start (Local)
 
-## Notes
+### 1) Clone & install
+```bash
+git clone https://github.com/AdhishMagic/AutoLoan-Loan-Processing-Decisioning-Platform.git
+cd AutoLoan-Loan-Processing-Decisioning-Platform
 
-- The repo is intentionally structured so the *logic* is portable: you can swap the underlying implementation details later (e.g., how tokens are issued, queue backend, or where files are stored) without changing the business workflow.
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Observability (Laravel Pulse)
+### 2) Configure environment
+Update `.env`:
+- `DB_*` (MySQL/Postgres)
+- `QUEUE_CONNECTION=database` (easy default) or `redis`
+- `MAIL_*` (Mailtrap recommended for dev)
 
-Pulse is the built-in observability layer for AutoLoan and is available at `/pulse`.
+### 3) Migrate database
+```bash
+php artisan migrate
+```
 
-**What Pulse monitors**
-- HTTP request performance (including slow requests)
-- Queue and job throughput/runtime (including slow jobs)
-- Exceptions and error rates
-- Slow database queries
-- Cache interactions (hit/miss patterns)
-- Server snapshots (worker / host health via scheduled `pulse:check`)
+### 4) Run the app
+```bash
+php artisan serve
+```
 
-**Access control**
-- `/pulse` is restricted to authenticated staff users only: `admin` and `loan_officer` (mapped to the `manager` role).
+---
 
-**AutoLoan workflows to watch**
-- Loan processing delays: look at slow requests and job runtimes around loan submission and processing.
-- KYC / Credit failures: check Exceptions + Queues views after dispatching background jobs.
-- Slow admin dashboard queries: review Slow Queries when reviewing applications.
-- Cache behavior for `loan:status:*`, `user:profile:*`, `kyc:result:*`: check Cache Interactions groups.
+## 🧵 Run Queues (Background Processing)
 
-**Common issues Pulse helps diagnose**
-- A spike in failed jobs when Redis/queue workers are down.
-- Long request times caused by slow DB queries.
-- Cache misses increasing load on loan status / KYC reads.
+### Option A: Database queue (simplest)
+```bash
+php artisan queue:table
+php artisan migrate
+php artisan queue:work
+```
+
+### Option B: Redis queue (faster)
+```bash
+# set QUEUE_CONNECTION=redis in .env
+php artisan queue:work
+```
+
+---
+
+## ⏱️ Scheduler (Cron)
+
+Run locally for development:
+```bash
+php artisan schedule:work
+```
+
+Production cron (example):
+```bash
+* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1
+```
+
+---
+
+## 🔒 Security Notes (Fintech mindset)
+
+- **Rate limit sensitive endpoints** (OTP / status checks)
+- **Encrypt PII at rest** using Laravel encryption or encrypted casts
+- Use **signed URLs** for document downloads
+- Keep **APP_KEY** safe and rotate secrets properly
+- Add **audit logs** for status changes and decisions
+
+---
+
+## 📡 API (Example Endpoints)
+
+> Actual routes may differ—this is the intended public API shape.
+
+- `POST /api/loans` — submit loan application
+- `GET /api/loans/{id}` — fetch loan status & details
+- `POST /api/loans/{id}/documents` — upload documents
+- `GET /api/loans/{id}/documents/{doc}` — download (signed URL)
+
+**Common API practices included:**
+- FormRequest validation
+- API Resources for consistent JSON
+- Sanctum token auth
+- Throttle middleware
+
+---
+
+## 🧪 Testing
+
+```bash
+php artisan test
+```
+
+Suggested test coverage:
+- Underwriting decision matrix (approve/reject/manual_review)
+- Policy rules (borrower vs underwriter vs admin)
+- Job dispatch flow for new loan applications
+- Signed URL download protections
+
+---
+
+## 📦 Free-tier Deployment Ideas
+
+- **App**: Render / Railway / Fly.io (free tiers vary)
+- **DB**: Render PostgreSQL / any free Postgres provider
+- **Queue**: database queue (simple) or Redis (if available)
+- **WebSockets**: self-host (free) + secure tunnel if needed
+
+---
+
+## 🗺️ Roadmap (Portfolio-grade add-ons)
+
+- [ ] Admin dashboard (loan funnel, SLA metrics, exceptions)
+- [ ] Decision trace UI (rule-by-rule evaluation breakdown)
+- [ ] Manual review workflow (assign underwriter, comments, attachments)
+- [ ] KYC/Credit check adapters (stubs → real integrations)
+- [ ] OpenAPI docs (`docs/openapi.yaml`) + Postman collection
+
+---
+
+## 🤝 Contributing
+
+PRs and suggestions are welcome:
+1. Fork the repo
+2. Create a feature branch
+3. Add tests for new logic
+4. Open a pull request with a clear description
+
+---
+
+## 📄 License
+
+This project is provided for learning and portfolio demonstration purposes. Add a license file if you plan to distribute it openly.
+
+---
+
+### ⭐ If you found this useful
+Give the repository a star and use the checklist above to turn AutoLoan into a standout “advanced Laravel” portfolio project.
