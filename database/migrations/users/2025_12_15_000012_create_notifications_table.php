@@ -12,6 +12,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('notifications')) {
+            return;
+        }
+
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type', 150)->nullable();
@@ -27,6 +31,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        // This migration is redundant in apps that already include Laravel's
+        // default notifications table; avoid dropping an existing table.
+        return;
     }
 };

@@ -15,6 +15,14 @@ return new class extends PulseMigration
             return;
         }
 
+        if (
+            Schema::hasTable('pulse_values')
+            || Schema::hasTable('pulse_entries')
+            || Schema::hasTable('pulse_aggregates')
+        ) {
+            return;
+        }
+
         Schema::create('pulse_values', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('timestamp');
@@ -77,8 +85,7 @@ return new class extends PulseMigration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pulse_values');
-        Schema::dropIfExists('pulse_entries');
-        Schema::dropIfExists('pulse_aggregates');
+        // Avoid dropping Pulse tables that may be managed by another migration.
+        return;
     }
 };

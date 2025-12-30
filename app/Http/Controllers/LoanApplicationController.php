@@ -330,13 +330,11 @@ class LoanApplicationController extends Controller
     public function edit(LoanApplication $loan): View|RedirectResponse
     {
         Gate::authorize('update', $loan);
-        // If the application is still in DRAFT, continue in the step wizard at the next pending step
-        if ($loan->isDraft()) {
-            $nextStep = ($loan->stage_order ?? 0) + 1;
-            return redirect()->route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]);
-        }
+        // Legacy edit UI removed; always continue in the wizard.
+        $nextStep = ($loan->stage_order ?? 0) + 1;
+        $nextStep = max(1, min(8, (int) $nextStep));
 
-        return view('loans.edit', compact('loan'));
+        return redirect()->route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]);
     }
 
     public function update(UpdateLoanApplicationRequest $request, LoanApplication $loan, LoanApplicationService $service): RedirectResponse

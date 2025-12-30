@@ -85,6 +85,12 @@ class LoanApplicationController extends Controller
     {
         Gate::authorize('update', $loan);
 
+        // Only drafts are editable in the wizard.
+        if (! $loan->isDraft()) {
+            return redirect()->route('loans.show', $loan)
+                ->with('error', 'This application can no longer be edited.');
+        }
+
         if ($step === 8) {
             $uploadedTypes = $loan->documents()->pluck('document_type')->all();
             $missing = array_values(array_diff(LoanDocument::requiredTypes(), $uploadedTypes));
@@ -359,13 +365,11 @@ class LoanApplicationController extends Controller
     public function edit(LoanApplication $loan): View|RedirectResponse
     {
         Gate::authorize('update', $loan);
-        // If the application is still in DRAFT, continue in the step wizard at the next pending step
-        if ($loan->isDraft()) {
-            $nextStep = ($loan->stage_order ?? 0) + 1;
-            return redirect()->route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]);
-        }
+        // Always use the 8-step wizard UI instead of the legacy 4-step form.
+        $nextStep = ($loan->stage_order ?? 0) + 1;
+        $nextStep = max(1, min(8, (int) $nextStep));
 
-        return view('loans.edit', compact('loan'));
+        return redirect()->route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]);
     }
 
     public function update(UpdateLoanApplicationRequest $request, LoanApplication $loan, LoanApplicationService $service): RedirectResponse

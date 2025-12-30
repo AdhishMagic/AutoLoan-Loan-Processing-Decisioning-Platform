@@ -10,8 +10,6 @@
         @if($loan->isDraft())
           <a href="{{ route('loans.step.show', ['loan' => $loan->id, 'step' => $nextStep]) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Continue</a>
         @else
-          <a href="{{ route('loans.edit', $loan) }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Edit</a>
-
           <form method="POST" action="{{ route('loans.destroy', $loan) }}" onsubmit="return confirm('Delete this application?')">
             @csrf
             @method('DELETE')

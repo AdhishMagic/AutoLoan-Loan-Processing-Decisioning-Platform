@@ -19,7 +19,7 @@ class AdminUserSeeder extends Seeder
             ->mapWithKeys(fn ($name) => [$name => Role::firstOrCreate(['name' => $name])]);
 
         // Create or update an admin user
-        $admin = User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Administrator',
@@ -30,7 +30,31 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        // Optionally create a sample loan officer and user
+        // Create or update a manager user
+        User::updateOrCreate(
+            ['email' => 'manager@example.com'],
+            [
+                'name' => 'Manager',
+                'password' => Hash::make('Manager@123'),
+                'status' => 'active',
+                'email_verified_at' => now(),
+                'role_id' => $roles['manager']->id,
+            ]
+        );
+
+        // Create or update a customer service user
+        User::updateOrCreate(
+            ['email' => 'support@example.com'],
+            [
+                'name' => 'Customer Support',
+                'password' => Hash::make('Support@123'),
+                'status' => 'active',
+                'email_verified_at' => now(),
+                'role_id' => $roles['customer_service']->id,
+            ]
+        );
+
+        // Backwards-compatible sample officer account (same role as manager)
         User::updateOrCreate(
             ['email' => 'officer@example.com'],
             [
