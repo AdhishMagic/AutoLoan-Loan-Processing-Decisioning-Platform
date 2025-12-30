@@ -30,21 +30,21 @@
                         </thead>
                         <tbody>
                             @forelse($loans as $loan)
-                                @php($s = strtoupper((string) $loan->status))
+                                @php
+                                    $s = strtoupper((string) ($loan->status ?? 'DRAFT'));
+                                    $statusClass = match (true) {
+                                        $s === 'APPROVED' => 'bg-status-success/10 text-status-success ring-1 ring-status-success/20',
+                                        $s === 'REJECTED' => 'bg-status-danger/10 text-status-danger ring-1 ring-status-danger/20',
+                                        in_array($s, ['MANUAL_REVIEW', 'HOLD', 'PENDING'], true) => 'bg-status-warning/10 text-status-warning ring-1 ring-status-warning/20',
+                                        default => 'bg-status-info/10 text-status-info ring-1 ring-status-info/20',
+                                    };
+                                @endphp
                                 <tr class="border-b border-app-divider bg-app-surface">
                                     <td class="px-4 py-3 font-medium">#{{ $loan->id }}</td>
                                     <td class="px-4 py-3">{{ $loan->user?->name ?? '—' }}</td>
                                     <td class="px-4 py-3">{{ $loan->loan_type ?? '—' }}</td>
                                     <td class="px-4 py-3">₹{{ number_format((float) ($loan->requested_amount ?? 0), 2) }}</td>
                                     <td class="px-4 py-3">
-                                        @php
-                                            $statusClass = match (true) {
-                                                $s === 'APPROVED' => 'bg-status-success/10 text-status-success ring-1 ring-status-success/20',
-                                                $s === 'REJECTED' => 'bg-status-danger/10 text-status-danger ring-1 ring-status-danger/20',
-                                                in_array($s, ['MANUAL_REVIEW', 'HOLD', 'PENDING'], true) => 'bg-status-warning/10 text-status-warning ring-1 ring-status-warning/20',
-                                                default => 'bg-status-info/10 text-status-info ring-1 ring-status-info/20',
-                                            };
-                                        @endphp
                                         <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $statusClass }}">
                                             {{ ucfirst(strtolower($s)) }}
                                         </span>

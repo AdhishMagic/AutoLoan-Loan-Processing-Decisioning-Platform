@@ -1,10 +1,19 @@
+@props([
+    'loan',
+    'step' => 1,
+    // Optional override: pass an associative array like [1 => 'Overview', ...]
+    'steps' => null,
+])
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-text-primary leading-tight">
                 {{ __('Loan Application') }} <span class="text-text-muted text-sm">#{{ $loan->application_number ?? 'NEW' }}</span>
             </h2>
-            @php($wizardStatus = strtoupper((string) ($loan->status ?? 'DRAFT')))
+            @php
+                $wizardStatus = strtoupper((string) ($loan->status ?? 'DRAFT'));
+            @endphp
             <span class="px-3 py-1 text-sm rounded-full ring-1 ring-app-border {{ $wizardStatus === 'DRAFT' ? 'bg-app-bg text-text-secondary' : ($wizardStatus === 'APPROVED' ? 'bg-status-success/10 text-status-success' : ($wizardStatus === 'REJECTED' ? 'bg-status-danger/10 text-status-danger' : 'bg-status-info/10 text-status-info')) }}">
                 {{ $wizardStatus }}
             </span>
@@ -18,7 +27,7 @@
                 <nav aria-label="Progress">
                     <ol role="list" class="flex items-center">
                         @php
-                            $steps = [
+                            $defaultSteps = [
                                 1 => 'Overview',
                                 2 => 'Applicants',
                                 3 => 'Income',
@@ -26,12 +35,37 @@
                                 5 => 'Property',
                                 6 => 'References',
                                 7 => 'Declarations',
-                                8 => 'Review'
+                                8 => 'Review',
                             ];
-                            $currentStep = $step ?? 1;
+
+                            $wizardSteps = $defaultSteps;
+
+                            if (is_iterable($steps)) {
+                                $tmp = [];
+                                foreach ($steps as $k => $v) {
+                                    $tmp[$k] = $v;
+                                }
+
+                                if (! empty($tmp)) {
+                                    $wizardSteps = $tmp;
+                                }
+                            }
+
+                            // Defensive: derive step from prop or route param, then clamp.
+                            $stepFromRoute = request()->route('step');
+                            $currentStep = (int) ($step ?? $stepFromRoute ?? 1);
+
+                            $minStepKey = 1;
+                            $maxStepKey = 1;
+                            if (is_array($wizardSteps) && ! empty($wizardSteps)) {
+                                $keys = array_map('intval', array_keys($wizardSteps));
+                                $minStepKey = min($keys);
+                                $maxStepKey = max($keys);
+                            }
+                            $currentStep = max($minStepKey, min($currentStep, $maxStepKey));
                         @endphp
 
-                        @foreach($steps as $key => $label)
+                        @foreach(($wizardSteps ?? []) as $key => $label)
                             <li class="relative pr-8 sm:pr-20 {{ $loop->last ? 'pr-0' : '' }}">
                                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
                                     @if(!$loop->last)

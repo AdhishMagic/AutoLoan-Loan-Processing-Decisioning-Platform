@@ -60,11 +60,11 @@
         <button
           type="button"
           data-theme-toggle
-          class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-toggle-bg hover:bg-toggle-hover focus:outline-none focus:ring-2 focus:ring-brand-focus focus:ring-offset-2 focus:ring-offset-app-bg"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-app-surface ring-1 ring-app-border hover:bg-app-hover focus:outline-none focus:ring-2 focus:ring-brand-focus focus:ring-offset-2 focus:ring-offset-app-bg"
           aria-label="Toggle dark mode"
           title="Toggle dark mode"
         >
-          <svg data-theme-icon="sun" class="hidden h-5 w-5 text-toggle-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <svg data-theme-icon="sun" class="hidden h-5 w-5 text-text-primary dark:text-toggle-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0 4a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1ZM12 4a1 1 0 0 1-1-1V2a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1ZM4 13H3a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2Zm18 0h-1a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2ZM6.34 18.66a1 1 0 0 1 0 1.41l-.7.7a1 1 0 1 1-1.41-1.41l.7-.7a1 1 0 0 1 1.41 0ZM19.77 5.64a1 1 0 0 1 0 1.41l-.7.7a1 1 0 0 1-1.41-1.41l.7-.7a1 1 0 0 1 1.41 0ZM5.64 4.23a1 1 0 0 1 .7.29l.7.7A1 1 0 1 1 5.64 6.93l-.7-.7a1 1 0 0 1 .7-1.7ZM18.36 17.07a1 1 0 0 1 1.41 0l.7.7a1 1 0 1 1-1.41 1.41l-.7-.7a1 1 0 0 1 0-1.41Z"/>
           </svg>
           <svg data-theme-icon="moon" class="hidden h-5 w-5 text-toggle-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

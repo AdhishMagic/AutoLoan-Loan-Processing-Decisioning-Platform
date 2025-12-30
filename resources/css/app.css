@@ -89,6 +89,19 @@ html.theme-transition * {
     transition-timing-function: ease;
 }
 
+/*
+ * Form controls: enforce theme-aware colors.
+ * @tailwindcss/forms defaults to light backgrounds; these base rules ensure
+ * inputs/selects/textarea match our CSS-variable theme in both light/dark.
+ */
+@layer base {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+    textarea,
+    select {
+        @apply bg-app-surface text-text-primary placeholder:text-text-muted;
+    }
+}
+
 /* Laravel Pulse Graph Fixes - Prevent graphs from being cut off */
 @layer utilities {
     /* Ensure Pulse graphs render at full height without clipping */
