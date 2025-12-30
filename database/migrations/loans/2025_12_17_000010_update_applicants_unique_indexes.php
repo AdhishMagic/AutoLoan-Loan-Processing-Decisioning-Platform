@@ -14,7 +14,8 @@ return new class extends Migration
     public function up(): void
     {
         // Attempt to drop any existing unique constraints on aadhaar_number and pan_number regardless of name (PostgreSQL)
-        if (DB::getDriverName() === 'pgsql') {
+        $driver = DB::connection()->getDriverName();
+        if ($driver === 'pgsql') {
             DB::unprepared(<<<'SQL'
 DO $$
 DECLARE r RECORD;
