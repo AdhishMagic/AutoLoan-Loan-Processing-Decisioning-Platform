@@ -13,8 +13,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-                // Attempt to drop any existing unique constraints on aadhaar_number and pan_number regardless of name (PostgreSQL)
-                DB::unprepared(<<<'SQL'
+        // Attempt to drop any existing unique constraints on aadhaar_number and pan_number regardless of name (PostgreSQL)
+        if (DB::getDriverName() === 'pgsql') {
+            DB::unprepared(<<<'SQL'
 DO $$
 DECLARE r RECORD;
 BEGIN
@@ -30,12 +31,13 @@ BEGIN
     END LOOP;
 END$$;
 SQL);
+        }
 
-                Schema::table('applicants', function (Blueprint $table) {
-                        // Add composite unique per loan to avoid duplicates within a loan
-                        $table->unique(['loan_application_id', 'aadhaar_number'], 'applicant_loan_aadhaar_unique');
-                        $table->unique(['loan_application_id', 'pan_number'], 'applicant_loan_pan_unique');
-                });
+        Schema::table('applicants', function (Blueprint $table) {
+            // Add composite unique per loan to avoid duplicates within a loan
+            $table->unique(['loan_application_id', 'aadhaar_number'], 'applicant_loan_aadhaar_unique');
+            $table->unique(['loan_application_id', 'pan_number'], 'applicant_loan_pan_unique');
+        });
     }
 
     public function down(): void
